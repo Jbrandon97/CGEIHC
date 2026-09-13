@@ -362,11 +362,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Archivos de Release requeridos por la entrega P03.
-!x64/
-!x64/Release/
-!x64/Release/*.exe
-!x64/Release/*.pdb
-!x64/Release/*.dll
-!x64/Release/shaders/
-!x64/Release/shaders/*
+# Ejecutable y dependencias de entrega en la raiz, como en Practica-02.
+!/P03-418048324.exe
+!/P03-418048324.pdb
+!/glew32.dll
+!/glfw3.dll
+!/shaders/
+!/shaders/*
