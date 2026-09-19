@@ -235,6 +235,15 @@ void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 	theWindow->xChange = static_cast<GLfloat>(xPos) - theWindow->lastX;
 	theWindow->yChange = theWindow->lastY - static_cast<GLfloat>(yPos);
 
+	// Al recuperar el foco, Windows puede informar un salto grande del cursor.
+	// Se ignora ese único salto para evitar que la cámara cambie bruscamente de dirección.
+	if (theWindow->xChange > 100.0f || theWindow->xChange < -100.0f ||
+		theWindow->yChange > 100.0f || theWindow->yChange < -100.0f)
+	{
+		theWindow->xChange = 0.0f;
+		theWindow->yChange = 0.0f;
+	}
+
 	theWindow->lastX = static_cast<GLfloat>(xPos);
 	theWindow->lastY = static_cast<GLfloat>(yPos);
 }

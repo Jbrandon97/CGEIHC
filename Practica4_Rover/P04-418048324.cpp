@@ -165,10 +165,12 @@ void DibujarParRuedas(glm::mat4 matrizBase, float posicionX, int primerIndice, c
 {
 	const glm::vec3 grisClaro(0.72f, 0.74f, 0.76f);
 	const glm::vec3 grisOscuro(0.30f, 0.32f, 0.34f);
-	const glm::vec3 negro(0.06f, 0.07f, 0.08f);
+	const glm::vec3 negro(0.10f, 0.11f, 0.12f);
 	const glm::vec3 naranja(1.0f, 0.55f, 0.05f);
+	const glm::vec3 azul(0.05f, 0.35f, 0.95f);
 
-	glm::mat4 eje = glm::translate(matrizBase, glm::vec3(posicionX, -0.45f, 0.0f));
+	// Se coloca debajo de la base para que las dos partes de la pata sean visibles.
+	glm::mat4 eje = glm::translate(matrizBase, glm::vec3(posicionX, -1.05f, 0.0f));
 	glm::mat4 barraEje = glm::rotate(eje, glm::radians(90.0f), glm::vec3(1, 0, 0));
 	DibujarCilindro(barraEje, glm::vec3(0.18f, 7.6f, 0.18f), grisOscuro, u);
 
@@ -177,20 +179,29 @@ void DibujarParRuedas(glm::mat4 matrizBase, float posicionX, int primerIndice, c
 		float signo = lado == 0 ? -1.0f : 1.0f;
 		int indiceRueda = primerIndice + lado;
 
-		// Primera parte de la L: sale del eje compartido hacia el costado.
-		glm::mat4 esquina = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 3.75f));
-		glm::mat4 parteHorizontal = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 3.35f));
+		// La primera esfera azul indica dónde entra la pata a la base.
+		glm::mat4 entradaPata = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 2.85f));
+		DibujarEsfera(entradaPata, glm::vec3(0.28f), azul, u);
+
+		// Primera parte de la L: un tramo horizontal corto y fácil de reconocer.
+		glm::mat4 esquina = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 4.45f));
+		glm::mat4 parteHorizontal = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 3.65f));
 		parteHorizontal = glm::rotate(parteHorizontal, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		DibujarCubo(parteHorizontal, glm::vec3(0.38f, 1.15f, 0.38f), grisClaro, u);
+		DibujarCubo(parteHorizontal, glm::vec3(0.32f, 1.60f, 0.32f), grisClaro, u);
+
+		// La segunda esfera azul está entre el tramo horizontal y el vertical.
+		DibujarEsfera(esquina, glm::vec3(0.30f), azul, u);
 
 		// Segunda parte de la L: baja desde la esquina hasta el centro de la llanta.
-		glm::mat4 centroRueda = glm::translate(esquina, glm::vec3(0.0f, -1.55f, signo * 0.75f));
-		glm::mat4 parteVertical = glm::translate(esquina, glm::vec3(0.0f, -0.78f, signo * 0.38f));
-		parteVertical = glm::rotate(parteVertical, glm::radians(signo * 12.0f), glm::vec3(1, 0, 0));
-		DibujarCubo(parteVertical, glm::vec3(0.42f, 1.75f, 0.42f), grisClaro, u);
+		glm::mat4 piePata = glm::translate(esquina, glm::vec3(0.0f, -2.00f, signo * 0.28f));
+		glm::mat4 parteVertical = glm::translate(esquina, glm::vec3(0.0f, -1.00f, signo * 0.14f));
+		parteVertical = glm::rotate(parteVertical, glm::radians(signo * 8.0f), glm::vec3(1, 0, 0));
+		DibujarCubo(parteVertical, glm::vec3(0.32f, 2.00f, 0.32f), grisClaro, u);
 
-		glm::mat4 ejeRueda = glm::rotate(centroRueda, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		DibujarCilindro(ejeRueda, glm::vec3(0.26f, 0.85f, 0.26f), grisOscuro, u);
+		// Un conector corto deja la llanta a la izquierda del tramo vertical.
+		glm::mat4 conectorRueda = glm::translate(piePata, glm::vec3(-0.38f, 0.0f, 0.0f));
+		DibujarCubo(conectorRueda, glm::vec3(0.76f, 0.24f, 0.24f), grisClaro, u);
+		glm::mat4 centroRueda = glm::translate(piePata, glm::vec3(-0.76f, 0.0f, 0.0f));
 
 		// La rotacion se aplica desde el centro para que esta llanta sea independiente.
 		glm::mat4 giro = glm::rotate(centroRueda,
@@ -198,12 +209,8 @@ void DibujarParRuedas(glm::mat4 matrizBase, float posicionX, int primerIndice, c
 		glm::mat4 llanta = glm::rotate(giro, glm::radians(90.0f), glm::vec3(1, 0, 0));
 		DibujarCilindro(llanta, glm::vec3(1.18f, 0.72f, 1.18f), negro, u);
 
-		glm::mat4 rin = glm::translate(giro, glm::vec3(0.0f, 0.0f, signo * 0.42f));
-		rin = glm::rotate(rin, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		DibujarCilindro(rin, glm::vec3(0.62f, 0.10f, 0.62f), grisClaro, u);
-
-		// La línea naranja basta para seguir visualmente una vuelta completa.
-		// Se conserva como hija de la rueda para que gire junto con la llanta y el rin.
+		// El rectángulo naranja permite distinguir el movimiento de la llanta negra.
+		// Se conserva como hijo de la rueda para que ambos giren juntos.
 		glm::mat4 marca = glm::translate(giro, glm::vec3(0.72f, 0.0f, signo * 0.51f));
 		DibujarCubo(marca, glm::vec3(0.52f, 0.22f, 0.14f), naranja, u);
 	}
