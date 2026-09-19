@@ -128,6 +128,25 @@ void Window::actualizarControles(GLfloat deltaTime)
 			while (giroRuedas[indice] >= 360.0f) giroRuedas[indice] -= 360.0f;
 		}
 	}
+
+	// Las tres articulaciones avanzan mientras se mantiene su tecla.
+	// Al llegar a 360 grados continúan desde cero para completar vueltas enteras.
+	const GLfloat avanceBrazo = 75.0f * deltaTime;
+	if (keys[GLFW_KEY_F])
+	{
+		articulacion1 += avanceBrazo;
+		while (articulacion1 >= 360.0f) articulacion1 -= 360.0f;
+	}
+	if (keys[GLFW_KEY_G])
+	{
+		articulacion2 += avanceBrazo;
+		while (articulacion2 >= 360.0f) articulacion2 -= 360.0f;
+	}
+	if (keys[GLFW_KEY_H])
+	{
+		articulacion3 += avanceBrazo;
+		while (articulacion3 >= 360.0f) articulacion3 -= 360.0f;
+	}
 }
 
 void Window::createCallbacks()
@@ -167,19 +186,6 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	if (key == GLFW_KEY_T && action == GLFW_PRESS)
 	{
 		theWindow->rotaz += 10.0;
-	}
-	if (key == GLFW_KEY_F && action == GLFW_PRESS)
-	{
-		theWindow->articulacion1 += 10.0;
-	}
-
-	if (key == GLFW_KEY_G && action == GLFW_PRESS)
-	{
-		theWindow->articulacion2 += 10.0;
-	}
-	if (key == GLFW_KEY_H && action == GLFW_PRESS)
-	{
-		theWindow->articulacion3 += 10.0;
 	}
 	if (key == GLFW_KEY_J && action == GLFW_PRESS)
 	{
