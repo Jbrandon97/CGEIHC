@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de código fuente">
+      <UniqueIdentifier>{E7A57A20-440F-4BC4-BEA1-7776F7BF19B7}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{C5441481-BDAE-4308-A185-E9BF4CD91C01}</UniqueIdentifier>
+      <Extensions>h;hpp</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{3756406B-EFC8-4B04-9A20-69140278C4A3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Mesh.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="P04-418048324.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Shader.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Sphere.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Window.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="definition.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Mesh.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Shader.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Sphere.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="stb_image.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Window.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader.vert"><Filter>Shaders</Filter></None>
+    <None Include="shaders\shader.frag"><Filter>Shaders</Filter></None>
+  </ItemGroup>
+</Project>
