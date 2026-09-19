@@ -202,15 +202,8 @@ void DibujarParRuedas(glm::mat4 matrizBase, float posicionX, int primerIndice, c
 		rin = glm::rotate(rin, glm::radians(90.0f), glm::vec3(1, 0, 0));
 		DibujarCilindro(rin, glm::vec3(0.62f, 0.10f, 0.62f), grisClaro, u);
 
-		// Los tacos también heredan el giro, así se aprecia que rota la rueda completa.
-		for (int taco = 0; taco < 8; taco++)
-		{
-			glm::mat4 relieve = glm::rotate(giro, glm::radians(taco * 45.0f), glm::vec3(0, 0, 1));
-			relieve = glm::translate(relieve, glm::vec3(1.03f, 0.0f, 0.0f));
-			DibujarCubo(relieve, glm::vec3(0.30f, 0.14f, 0.78f), grisOscuro, u);
-		}
-
-		// Una marca de color facilita seguir una vuelta completa durante la demostración.
+		// La línea naranja basta para seguir visualmente una vuelta completa.
+		// Se conserva como hija de la rueda para que gire junto con la llanta y el rin.
 		glm::mat4 marca = glm::translate(giro, glm::vec3(0.72f, 0.0f, signo * 0.51f));
 		DibujarCubo(marca, glm::vec3(0.52f, 0.22f, 0.14f), naranja, u);
 	}
