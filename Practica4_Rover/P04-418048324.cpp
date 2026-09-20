@@ -159,49 +159,42 @@ void DibujarEsfera(glm::mat4 matriz, glm::vec3 escala, glm::vec3 color, const Un
 	esfera.render();
 }
 
-// Dibuja una pareja de ruedas. El eje transversal pertenece a la base y es
-// compartido, pero cada llanta conserva su propio angulo de giro.
+// Dibuja una pareja de ruedas. Cada pata se conecta directamente a la base
+// y cada llanta conserva su propio angulo de giro.
 void DibujarParRuedas(glm::mat4 matrizBase, float posicionX, int primerIndice, const Uniformes& u)
 {
 	const glm::vec3 grisClaro(0.72f, 0.74f, 0.76f);
-	const glm::vec3 grisOscuro(0.30f, 0.32f, 0.34f);
 	const glm::vec3 negro(0.10f, 0.11f, 0.12f);
 	const glm::vec3 naranja(1.0f, 0.55f, 0.05f);
 	const glm::vec3 azul(0.05f, 0.35f, 0.95f);
-
-	// Se coloca debajo de la base para que las dos partes de la pata sean visibles.
-	glm::mat4 eje = glm::translate(matrizBase, glm::vec3(posicionX, -1.05f, 0.0f));
-	glm::mat4 barraEje = glm::rotate(eje, glm::radians(90.0f), glm::vec3(1, 0, 0));
-	DibujarCilindro(barraEje, glm::vec3(0.18f, 7.6f, 0.18f), grisOscuro, u);
 
 	for (int lado = 0; lado < 2; lado++)
 	{
 		float signo = lado == 0 ? -1.0f : 1.0f;
 		int indiceRueda = primerIndice + lado;
 
-		// La primera esfera azul indica dónde entra la pata a la base.
-		glm::mat4 entradaPata = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 2.85f));
-		DibujarEsfera(entradaPata, glm::vec3(0.28f), azul, u);
+		// Primera union: la pata nace directamente en el costado de la base verde.
+		glm::mat4 entradaPata = glm::translate(matrizBase,
+			glm::vec3(posicionX, -0.20f, signo * 3.35f));
+		DibujarEsfera(entradaPata, glm::vec3(0.30f), azul, u);
 
-		// Primera parte de la L: un tramo horizontal corto y fácil de reconocer.
-		glm::mat4 esquina = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 4.45f));
-		glm::mat4 parteHorizontal = glm::translate(eje, glm::vec3(0.0f, 0.0f, signo * 3.65f));
-		parteHorizontal = glm::rotate(parteHorizontal, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		DibujarCubo(parteHorizontal, glm::vec3(0.32f, 1.60f, 0.32f), grisClaro, u);
+		// El primer tramo sale inclinado, como en el esquema de referencia.
+		glm::mat4 articulacionPata = glm::translate(entradaPata,
+			glm::vec3(0.0f, -0.65f, signo * 1.55f));
+		glm::mat4 tramoInclinado = glm::translate(entradaPata,
+			glm::vec3(0.0f, -0.325f, signo * 0.775f));
+		tramoInclinado = glm::rotate(tramoInclinado,
+			glm::radians(signo * -67.3f), glm::vec3(1, 0, 0));
+		DibujarCubo(tramoInclinado, glm::vec3(0.32f, 1.68f, 0.32f), grisClaro, u);
 
-		// La segunda esfera azul está entre el tramo horizontal y el vertical.
-		DibujarEsfera(esquina, glm::vec3(0.30f), azul, u);
+		// Segunda union: desde esta esfera solamente baja el tramo vertical.
+		DibujarEsfera(articulacionPata, glm::vec3(0.30f), azul, u);
+		glm::mat4 piePata = glm::translate(articulacionPata, glm::vec3(0.0f, -1.75f, 0.0f));
+		glm::mat4 tramoVertical = glm::translate(articulacionPata, glm::vec3(0.0f, -0.875f, 0.0f));
+		DibujarCubo(tramoVertical, glm::vec3(0.32f, 1.75f, 0.32f), grisClaro, u);
 
-		// Segunda parte de la L: baja desde la esquina hasta el centro de la llanta.
-		glm::mat4 piePata = glm::translate(esquina, glm::vec3(0.0f, -2.00f, signo * 0.28f));
-		glm::mat4 parteVertical = glm::translate(esquina, glm::vec3(0.0f, -1.00f, signo * 0.14f));
-		parteVertical = glm::rotate(parteVertical, glm::radians(signo * 8.0f), glm::vec3(1, 0, 0));
-		DibujarCubo(parteVertical, glm::vec3(0.32f, 2.00f, 0.32f), grisClaro, u);
-
-		// Un conector corto deja la llanta a la izquierda del tramo vertical.
-		glm::mat4 conectorRueda = glm::translate(piePata, glm::vec3(-0.38f, 0.0f, 0.0f));
-		DibujarCubo(conectorRueda, glm::vec3(0.76f, 0.24f, 0.24f), grisClaro, u);
-		glm::mat4 centroRueda = glm::translate(piePata, glm::vec3(-0.76f, 0.0f, 0.0f));
+		// La llanta queda en el costado exterior de la pata y toca el tubo vertical.
+		glm::mat4 centroRueda = glm::translate(piePata, glm::vec3(0.0f, 0.0f, signo * 0.52f));
 
 		// La rotacion se aplica desde el centro para que esta llanta sea independiente.
 		glm::mat4 giro = glm::rotate(centroRueda,
@@ -281,7 +274,7 @@ void DibujarRover(const Uniformes& u)
 	glm::mat4 ventana = glm::translate(cabina, glm::vec3(0.0f, 0.15f, 2.68f));
 	DibujarCubo(ventana, glm::vec3(3.4f, 0.65f, 0.10f), vidrio, u);
 
-	// Tres ejes compartidos producen seis ruedas con patas completas en L.
+	// Tres pares forman seis patas independientes conectadas directamente a la base.
 	DibujarParRuedas(matrizBase, -3.7f, 0, u);
 	DibujarParRuedas(matrizBase, 0.0f, 2, u);
 	DibujarParRuedas(matrizBase, 3.7f, 4, u);
