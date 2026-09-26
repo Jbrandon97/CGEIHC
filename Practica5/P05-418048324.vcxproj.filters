@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de código fuente">
+      <UniqueIdentifier>{E7A57A20-440F-4BC4-BEA1-7776F7BF19B7}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{C5441481-BDAE-4308-A185-E9BF4CD91C01}</UniqueIdentifier>
+      <Extensions>h;hpp</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{3756406B-EFC8-4B04-9A20-69140278C4A3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Mesh_tn.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Model.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="P05-418048324.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Shader_m.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Skybox.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+    <ClCompile Include="Window.cpp"><Filter>Archivos de código fuente</Filter></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Mesh_tn.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Model.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Shader_m.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Skybox.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="stb_image.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+    <ClInclude Include="Window.h"><Filter>Archivos de encabezado</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader_m.vert"><Filter>Shaders</Filter></None>
+    <None Include="shaders\shader_m.frag"><Filter>Shaders</Filter></None>
+    <None Include="shaders\skybox.vert"><Filter>Shaders</Filter></None>
+    <None Include="shaders\skybox.frag"><Filter>Shaders</Filter></None>
+  </ItemGroup>
+</Project>
