@@ -78,6 +78,11 @@ int Window::Initialise()
 	createCallbacks();
 	// El cursor queda capturado para poder girar la cámara sin detenerse en los bordes.
 	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// El movimiento directo evita saltos cuando Windows intenta recentrar el cursor.
+	if (glfwRawMouseMotionSupported())
+	{
+		glfwSetInputMode(mainWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
 
 
 	//permitir nuevas extensiones
@@ -226,8 +231,10 @@ void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 		theWindow->mouseFirstMoved = false;
 	}
 
-	theWindow->xChange = static_cast<GLfloat>(xPos) - theWindow->lastX;
-	theWindow->yChange = theWindow->lastY - static_cast<GLfloat>(yPos);
+	// Se acumulan todos los eventos recibidos antes del siguiente cuadro.
+	// De esta manera no se pierde el movimiento vertical del mouse.
+	theWindow->xChange += static_cast<GLfloat>(xPos) - theWindow->lastX;
+	theWindow->yChange += theWindow->lastY - static_cast<GLfloat>(yPos);
 
 	theWindow->lastX = static_cast<GLfloat>(xPos);
 	theWindow->lastY = static_cast<GLfloat>(yPos);

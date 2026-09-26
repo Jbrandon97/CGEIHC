@@ -121,12 +121,12 @@ void CrearSkybox()
 {
     // Las seis imagenes forman el fondo y ayudan a presentar los modelos en el espacio.
     std::vector<std::string> caras = {
-        "Textures/Skybox/cupertin-lake-night_rt.tga",
-        "Textures/Skybox/cupertin-lake-night_lf.tga",
-        "Textures/Skybox/cupertin-lake-night_dn.tga",
-        "Textures/Skybox/cupertin-lake-night_up.tga",
-        "Textures/Skybox/cupertin-lake-night_bk.tga",
-        "Textures/Skybox/cupertin-lake-night_ft.tga"
+        "Textures/Skybox/cupertin-lake_rt.tga",
+        "Textures/Skybox/cupertin-lake_lf.tga",
+        "Textures/Skybox/cupertin-lake_dn.tga",
+        "Textures/Skybox/cupertin-lake_up.tga",
+        "Textures/Skybox/cupertin-lake_bk.tga",
+        "Textures/Skybox/cupertin-lake_ft.tga"
     };
     skybox = Skybox(caras);
 }
@@ -193,8 +193,7 @@ void DibujarModelo(Model& modelo, const glm::mat4& matriz, const glm::vec3& colo
     GLuint uniformeModelo, GLuint uniformeColor)
 {
     glUniformMatrix4fv(uniformeModelo, 1, GL_FALSE, glm::value_ptr(matriz));
-    glUniform3fv(uniformeColor, 1, glm::value_ptr(color));
-    modelo.RenderModel();
+    modelo.RenderModel(uniformeColor, color);
 }
 
 
@@ -250,7 +249,7 @@ int main()
         -90.0f,
         -8.0f,
         5.0f,
-        0.12f
+        0.09f
     );
 
     glm::mat4 projection = glm::perspective(
@@ -348,9 +347,9 @@ int main()
             anguloAntena
         );
 
-        DibujarModelo(satelitePanelIzquierdo, panelIzquierdo, glm::vec3(0.04f, 0.16f, 0.48f), uniformeModelo, uniformeColor);
-        DibujarModelo(satelitePanelDerecho, panelDerecho, glm::vec3(0.04f, 0.16f, 0.48f), uniformeModelo, uniformeColor);
-        DibujarModelo(sateliteAntena, antena, glm::vec3(0.95f, 0.58f, 0.10f), uniformeModelo, uniformeColor);
+        DibujarModelo(satelitePanelIzquierdo, panelIzquierdo, glm::vec3(0.07f, 0.07f, 0.66f), uniformeModelo, uniformeColor);
+        DibujarModelo(satelitePanelDerecho, panelDerecho, glm::vec3(0.07f, 0.07f, 0.66f), uniformeModelo, uniformeColor);
+        DibujarModelo(sateliteAntena, antena, glm::vec3(0.76f), uniformeModelo, uniformeColor);
 
         glUseProgram(0);
         mainWindow.swapBuffers();

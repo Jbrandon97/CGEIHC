@@ -1,5 +1,6 @@
 # Blender 5.2.2 LTS
 # www.blender.org
+mtllib Holocron_Esquina_02.mtl
 o Holocron_Esquina_02
 v -3.886436 -3.032302 4.975234
 v -2.658939 -4.184692 4.946270
@@ -6333,6 +6334,7 @@ vt 0.555073 0.444044
 vt 0.509518 0.483715
 vt 0.763187 0.652597
 s 1
+usemtl Holocron_Corners.001
 f 484/1/1 483/2/2 1907/3/3
 f 1298/4/4 1/5/5 199/6/6
 f 1249/7/7 20/8/8 104/9/9

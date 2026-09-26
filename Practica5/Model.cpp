@@ -31,14 +31,18 @@ void Model::ClearModel()
 
 		}
 	}
-
-
+	MeshList.clear();
+	meshColors.clear();
+	meshUsesMaterialColor.clear();
 }
 
-void Model::RenderModel()
+void Model::RenderModel(GLuint colorLocation, const glm::vec3& fallbackColor)
 {
 	for (unsigned int i = 0; i < MeshList.size(); i++)
 	{
+		// Conserva el color del MTL cuando existe; si no, usa el color indicado por el modelo.
+		const glm::vec3& color = meshUsesMaterialColor[i] ? meshColors[i] : fallbackColor;
+		glUniform3fv(colorLocation, 1, &color[0]);
 		MeshList[i]->RenderMeshModel();
 
 	}
@@ -98,6 +102,25 @@ void Model::LoadMesh(aiMesh * mesh, const aiScene * scene)
 		static_cast<unsigned int>(vertices.size()),
 		static_cast<unsigned int>(indices.size()));
 	MeshList.push_back(newMeshModel);
-	meshTotex.push_back(mesh->mMaterialIndex);
+
+	// Assimp separa los grupos de material del OBJ en distintas mallas.
+	// Se guarda el color difuso para dibujar cada parte con su apariencia original.
+	glm::vec3 materialColor(0.0f);
+	bool hasMaterialColor = false;
+	if (mesh->mMaterialIndex < scene->mNumMaterials)
+	{
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		aiString materialName;
+		aiColor3D diffuseColor;
+		material->Get(AI_MATKEY_NAME, materialName);
+		if (std::string(materialName.C_Str()) != "DefaultMaterial" &&
+			material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor) == AI_SUCCESS)
+		{
+			materialColor = glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			hasMaterialColor = true;
+		}
+	}
+	meshColors.push_back(materialColor);
+	meshUsesMaterialColor.push_back(hasMaterialColor);
 }
 
