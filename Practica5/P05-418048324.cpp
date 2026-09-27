@@ -56,7 +56,7 @@ const std::array<glm::vec3, 8> ejesEsquinas = {
     glm::normalize(glm::vec3( 2.59f,  2.58f,  2.66f))
 };
 glm::vec3 posicionSatelite(10.0f, 1.0f, -4.0f);
-glm::vec3 rotacionSatelite(0.0f);
+GLfloat rotacionSateliteY = 0.0f;
 GLfloat anguloPanelIzquierdo = 0.0f;
 GLfloat anguloPanelDerecho = 0.0f;
 GLfloat anguloAntena = 0.0f;
@@ -70,7 +70,7 @@ static const char* fShader = "shaders/shader_m.frag";
 
 void CrearPiso()
 {
-    // El piso sirve como referencia para apreciar los movimientos de la escena.
+    // La plataforma sirve como referencia para apreciar mejor los modelos y sus movimientos.
     unsigned int indices[] = {
         0, 2, 1,
         1, 2, 3
@@ -123,10 +123,10 @@ void CrearSkybox()
     std::vector<std::string> caras = {
         "Textures/Skybox/cupertin-lake_rt.tga",
         "Textures/Skybox/cupertin-lake_lf.tga",
-        "Textures/Skybox/cupertin-lake_dn.tga",
         "Textures/Skybox/cupertin-lake_up.tga",
-        "Textures/Skybox/cupertin-lake_bk.tga",
-        "Textures/Skybox/cupertin-lake_ft.tga"
+        "Textures/Skybox/cupertin-lake_dn.tga",
+        "Textures/Skybox/cupertin-lake_ft.tga",
+        "Textures/Skybox/cupertin-lake_bk.tga"
     };
     skybox = Skybox(caras);
 }
@@ -165,14 +165,11 @@ void ActualizarControles(bool* teclas, GLfloat tiempo)
     if (teclas[GLFW_KEY_UP]) posicionSatelite.z -= velocidadMovimiento;
     if (teclas[GLFW_KEY_DOWN]) posicionSatelite.z += velocidadMovimiento;
 
-    // Estos tres pares permiten orientar el satelite completo en sus tres ejes.
+    // Q y E giran el satelite completo en sentidos opuestos sobre su eje vertical.
     const GLfloat velocidadRotacion = 48.0f * tiempo;
-    if (teclas[GLFW_KEY_I]) rotacionSatelite.x += velocidadRotacion;
-    if (teclas[GLFW_KEY_K]) rotacionSatelite.x -= velocidadRotacion;
-    if (teclas[GLFW_KEY_J]) rotacionSatelite.y += velocidadRotacion;
-    if (teclas[GLFW_KEY_L]) rotacionSatelite.y -= velocidadRotacion;
-    if (teclas[GLFW_KEY_U]) rotacionSatelite.z += velocidadRotacion;
-    if (teclas[GLFW_KEY_O]) rotacionSatelite.z -= velocidadRotacion;
+    if (teclas[GLFW_KEY_Q]) rotacionSateliteY += velocidadRotacion;
+    if (teclas[GLFW_KEY_E]) rotacionSateliteY -= velocidadRotacion;
+    AjustarAngulo(rotacionSateliteY);
 
     // Los paneles y la antena se mueven desde el punto donde se unen al cuerpo.
     const GLfloat velocidadPieza = 45.0f * tiempo;
@@ -201,9 +198,7 @@ glm::mat4 MatrizSatelite()
 {
     glm::mat4 matriz(1.0f);
     matriz = glm::translate(matriz, posicionSatelite);
-    matriz = glm::rotate(matriz, rotacionSatelite.x * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-    matriz = glm::rotate(matriz, rotacionSatelite.y * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
-    matriz = glm::rotate(matriz, rotacionSatelite.z * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+    matriz = glm::rotate(matriz, rotacionSateliteY * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
     matriz = glm::scale(matriz, glm::vec3(0.22f));
     return matriz;
 }
@@ -226,7 +221,7 @@ void MostrarControles()
     printf("1 a 8: girar cada esquina del Holocron\n");
     printf("Shift + 1 a 8: girar la esquina en sentido contrario\n");
     printf("Flechas y Page Up/Page Down: mover el satelite en X, Y y Z\n");
-    printf("I/K, J/L, U/O: rotar el satelite en X, Y y Z\n");
+    printf("Q/E: rotar el satelite completo en sentidos opuestos\n");
     printf("Z/X: panel izquierdo, C/V: panel derecho, B/N: antena\n");
     printf("Escape: cerrar\n");
 }

@@ -16,8 +16,8 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 	glGenTextures(1, &textureId);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 	int width, height, bitDepth;
-	// Se define la orientacion antes de cargar la primera cara del fondo.
-	stbi_set_flip_vertically_on_load(true);
+	// Las caras del cubo ya tienen su orientacion; invertirlas volteaba una parte del cielo.
+	stbi_set_flip_vertically_on_load(false);
 	for (size_t i = 0; i < 6; i++)
 	{
 
