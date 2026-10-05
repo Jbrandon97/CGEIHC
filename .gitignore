@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Modelos y simbolos de la entrega
+!**/Models/*.obj
+!/P06-418048324.pdb
