@@ -1,0 +1,134 @@
+[
+  {
+    "name": "rover_cuerpo",
+    "pivot": [
+      0,
+      -0.534,
+      3.3
+    ],
+    "parent": -1,
+    "vertices": 1546,
+    "faces": 2611
+  },
+  {
+    "name": "rover_suspension_izquierda",
+    "pivot": [
+      -0.5,
+      1.266,
+      3.3
+    ],
+    "parent": 0,
+    "vertices": 79,
+    "faces": 127
+  },
+  {
+    "name": "rover_suspension_derecha",
+    "pivot": [
+      -0.5,
+      -2.334,
+      3.3
+    ],
+    "parent": 0,
+    "vertices": 79,
+    "faces": 127
+  },
+  {
+    "name": "rover_brazo_base",
+    "pivot": [
+      1.745,
+      0.566,
+      4.42
+    ],
+    "parent": 0,
+    "vertices": 304,
+    "faces": 436
+  },
+  {
+    "name": "rover_brazo_1",
+    "pivot": [
+      1.745,
+      0.566,
+      5.62
+    ],
+    "parent": 3,
+    "vertices": 180,
+    "faces": 242
+  },
+  {
+    "name": "rover_brazo_2",
+    "pivot": [
+      4.279,
+      0.566,
+      8.176
+    ],
+    "parent": 4,
+    "vertices": 557,
+    "faces": 848
+  },
+  {
+    "name": "rover_pata_rueda_delantero_izquierdo",
+    "pivot": [
+      2.145,
+      2.325,
+      3.846
+    ],
+    "parent": 1,
+    "vertices": 1140,
+    "faces": 2137
+  },
+  {
+    "name": "rover_pata_rueda_central_izquierdo",
+    "pivot": [
+      -2.492,
+      2.325,
+      3.215
+    ],
+    "parent": 1,
+    "vertices": 966,
+    "faces": 1762
+  },
+  {
+    "name": "rover_pata_rueda_trasero_izquierdo",
+    "pivot": [
+      -3.492,
+      2.325,
+      3.215
+    ],
+    "parent": 1,
+    "vertices": 966,
+    "faces": 1762
+  },
+  {
+    "name": "rover_pata_rueda_delantero_derecho",
+    "pivot": [
+      2.145,
+      -3.394,
+      3.846
+    ],
+    "parent": 2,
+    "vertices": 1140,
+    "faces": 2137
+  },
+  {
+    "name": "rover_pata_rueda_central_derecho",
+    "pivot": [
+      -2.492,
+      -3.394,
+      3.215
+    ],
+    "parent": 2,
+    "vertices": 966,
+    "faces": 1762
+  },
+  {
+    "name": "rover_pata_rueda_trasero_derecho",
+    "pivot": [
+      -3.492,
+      -3.394,
+      3.215
+    ],
+    "parent": 2,
+    "vertices": 966,
+    "faces": 1762
+  }
+]

@@ -1,0 +1,3 @@
+newmtl Rover
+Kd 0.65 0.65 0.65
+map_Kd ../Textures/plain.png

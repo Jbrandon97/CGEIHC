@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# P07: OBJ de modelos necesarios para ejecutar
+!**/Models/*.obj

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup>
+<ClCompile Include="Camera.cpp" />
+<ClInclude Include="Camera.h" />
+<ClInclude Include="CommonValues.h" />
+<ClCompile Include="DirectionalLight.cpp" />
+<ClInclude Include="DirectionalLight.h" />
+<ClCompile Include="Light.cpp" />
+<ClInclude Include="Light.h" />
+<ClCompile Include="Material.cpp" />
+<ClInclude Include="Material.h" />
+<ClCompile Include="Mesh_tn.cpp" />
+<ClInclude Include="Mesh_tn.h" />
+<ClCompile Include="Model.cpp" />
+<ClInclude Include="Model.h" />
+<ClCompile Include="P07-418048324.cpp" />
+<ClCompile Include="PointLight.cpp" />
+<ClInclude Include="PointLight.h" />
+<ClCompile Include="Shader_light.cpp" />
+<ClInclude Include="Shader_light.h" />
+<ClCompile Include="Skybox.cpp" />
+<ClInclude Include="Skybox.h" />
+<ClCompile Include="SpotLight.cpp" />
+<ClInclude Include="SpotLight.h" />
+<ClInclude Include="stb_image.h" />
+<ClCompile Include="Texture.cpp" />
+<ClInclude Include="Texture.h" />
+<ClCompile Include="Window.cpp" />
+<ClInclude Include="Window.h" />
+</ItemGroup>
+</Project>
