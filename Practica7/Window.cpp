@@ -77,7 +77,7 @@ int Window::Initialise()
 	//MANEJAR TECLADO y MOUSE
 	createCallbacks();
 	// El cursor queda capturado para poder girar la cÃƒÆ’Ã‚Â¡mara sin detenerse en los bordes.
-	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	//permitir nuevas extensiones
@@ -108,48 +108,6 @@ GLfloat Window::getGiroRueda(int indice) const
 	return giroRuedas[indice];
 }
 
-void Window::actualizarControles(GLfloat deltaTime)
-{
-	// Se limita un salto ocasional de tiempo para que los movimientos permanezcan suaves.
-	if (deltaTime > 0.05f) deltaTime = 0.05f;
-
-	// Mantener R presionada permite completar vueltas continuas de todo el conjunto.
-	if (keys[GLFW_KEY_R])
-	{
-		rotay += 60.0f * deltaTime;
-		while (rotay >= 360.0f) rotay -= 360.0f;
-	}
-
-	// Cada tecla numÃƒÆ’Ã‚Â©rica hace girar de forma continua solamente su rueda.
-	for (int indice = 0; indice < 6; indice++)
-	{
-		if (keys[GLFW_KEY_1 + indice])
-		{
-			giroRuedas[indice] += 180.0f * deltaTime;
-			while (giroRuedas[indice] >= 360.0f) giroRuedas[indice] -= 360.0f;
-		}
-	}
-
-	// Las tres articulaciones avanzan mientras se mantiene su tecla.
-	// Al llegar a 360 grados continÃƒÆ’Ã‚Âºan desde cero para completar vueltas enteras.
-	const GLfloat avanceBrazo = 75.0f * deltaTime;
-	if (keys[GLFW_KEY_F])
-	{
-		articulacion1 += avanceBrazo;
-		while (articulacion1 >= 360.0f) articulacion1 -= 360.0f;
-	}
-	if (keys[GLFW_KEY_G])
-	{
-		articulacion2 += avanceBrazo;
-		while (articulacion2 >= 360.0f) articulacion2 -= 360.0f;
-	}
-	if (keys[GLFW_KEY_H])
-	{
-		articulacion3 += avanceBrazo;
-		while (articulacion3 >= 360.0f) articulacion3 -= 360.0f;
-	}
-}
-
 void Window::createCallbacks()
 {
 	glfwSetKeyCallback(mainWindow, ManejaTeclado);
@@ -173,41 +131,8 @@ GLfloat Window::getYChange()
 void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, int mode)
 {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (action == GLFW_PRESS && key >= GLFW_KEY_0 && key <= GLFW_KEY_4)
-        theWindow->vistaElegida = key - GLFW_KEY_0;
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-
-	
-	if (key == GLFW_KEY_E && action == GLFW_PRESS)
-	{
-		theWindow->rotax += 10.0;
-	}
-	if (key == GLFW_KEY_T && action == GLFW_PRESS)
-	{
-		theWindow->rotaz += 10.0;
-	}
-	if (key == GLFW_KEY_J && action == GLFW_PRESS)
-	{
-		theWindow->articulacion4 += 10.0;
-	}
-	if (key == GLFW_KEY_K && action == GLFW_PRESS)
-	{
-		theWindow->articulacion5 += 10.0;
-	}
-	if (key == GLFW_KEY_L && action == GLFW_PRESS)
-	{
-		theWindow->articulacion6 += 10.0;
-	}
-
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
-	{
-		const char* key_name = glfwGetKeyName(GLFW_KEY_D, 0);
-		//printf("se presiono la tecla: %s\n",key_name);
-	}
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
 
 	if (key >= 0 && key < 1024)
 	{

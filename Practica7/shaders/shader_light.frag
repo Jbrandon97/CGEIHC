@@ -56,6 +56,7 @@ uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 uniform sampler2D theTexture;
 uniform bool alphaCutout;
+uniform bool useMaterialTexture;
 uniform Material material;
 
 uniform vec3 eyePosition;
@@ -161,7 +162,7 @@ void main()
 	vec4 finalcolor = CalcDirectionalLight();
 	finalcolor += CalcPointLights();
 	finalcolor += CalcSpotLights();
-	vec4 texel = texture(theTexture, TexCoord)*vColor;
+	vec4 texel = (useMaterialTexture ? texture(theTexture, TexCoord) : vec4(1))*vColor;
 	if(alphaCutout && texel.a < 0.1) discard;
 	color = vec4(texel.rgb * finalcolor.rgb, texel.a);
 	//color = texture(theTexture, TexCoord)*vColor*finalcolor;

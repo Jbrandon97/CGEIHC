@@ -48,24 +48,21 @@ void Model::ClearModel()
 	MeshList.clear();
 	TextureList.clear();
 	meshTotex.clear();
+    materialColors.clear(); materialSpecular.clear(); materialShininess.clear();
 }
 
-void Model::RenderModel()
+void Model::RenderModel(GLint colorLocation, GLint textureLocation, GLint specularLocation, GLint shininessLocation)
 {
-	for (unsigned int i = 0; i < MeshList.size(); i++)
-	{
-		unsigned int materialIndex = meshTotex[i];
-		if (materialIndex < TextureList.size() && TextureList[materialIndex])
-		{
-			TextureList[materialIndex]->UseTexture();
-		}
-		MeshList[i]->RenderMeshModel();
-
-	}
-
-
+    for (size_t i = 0; i < MeshList.size(); ++i) {
+        unsigned int m = meshTotex[i];
+        glUniform3fv(colorLocation, 1, &materialColors[m][0]);
+        glUniform1i(textureLocation, TextureList[m] != nullptr);
+        glUniform1f(specularLocation, materialSpecular[m]);
+        glUniform1f(shininessLocation, materialShininess[m]);
+        if (TextureList[m]) TextureList[m]->UseTexture();
+        MeshList[i]->RenderMeshModel();
+    }
 }
-
 
 Model::~Model()
 {
@@ -119,91 +116,32 @@ void Model::LoadMesh(aiMesh * mesh, const aiScene * scene)
 	meshTotex.push_back(mesh->mMaterialIndex);
 }
 
-bool Model::LoadMaterials(const aiScene * scene)
+bool Model::LoadMaterials(const aiScene* scene)
 {
-	bool ok = true;
-	std::unordered_map<std::string, Texture*> loadedTextures; // Mapa para evitar duplicados
-	TextureList.resize(scene->mNumMaterials);
-	for (unsigned int i = 0; i < scene ->mNumMaterials; i++)
-	{
-		aiMaterial* material = scene->mMaterials[i];
-		TextureList[i] = nullptr;
-		if (material->GetTextureCount(aiTextureType_DIFFUSE	))
-		{
-			aiString path;
-			if (material->GetTexture(aiTextureType_DIFFUSE,0,&path)==AI_SUCCESS)
-			{
-				// Aceptar separadores de Windows y de Blender; las imagenes viven en Textures.
-				std::string filename(path.C_Str());
-				const auto separator = filename.find_last_of("/\\");
-				if (separator != std::string::npos) filename = filename.substr(separator + 1);
-				std::string tga ="tga";
-				std::string png = "png";
-				std::size_t existetga = filename.find(tga);
-				std::size_t existepng= filename.find(png);
-				std::string texPath = std::string("Textures/") + filename;
-				// Verifica si ya se cargÃƒÂ³ esta textura antes
-				auto it = loadedTextures.find(texPath);
-				if (it != loadedTextures.end())
-				{
-					TextureList[i] = it->second; // Reutiliza la textura ya cargada
-				}
-				else
-				{
-					Texture* newTex = new Texture(texPath.c_str());
-					std::string ext = filename.substr(filename.find_last_of('.') + 1);
-
-					bool loaded = false;
-					if (ext == "tga" || ext=="png")
-					{
-						loaded = newTex->LoadTextureA();
-					}
-					else
-					{
-						loaded = newTex->LoadTexture();
-					}
-
-					if (loaded)
-					{
-						TextureList[i] = newTex;
-						loadedTextures[texPath] = newTex; // Almacena para reutilizarla
-					}
-					else
-					{
-						printf("FallÃƒÂ³ en cargar la Textura :%s\n", texPath.c_str());
-						delete newTex;
-                        ok = false;
-					}
-				}
-
-			/*	TextureList[i] = new Texture(texPath.c_str());
-				if (existetga != std::string::npos || existepng != std::string::npos)
-				{
-					if (!TextureList[i]->LoadTextureA())
-					{
-						printf("FallÃƒÂ³ en cargar la Textura :%s\n", texPath);
-						delete TextureList[i];
-						TextureList[i] = nullptr;
-					}
-				}
-				else
-				{
-					if (!TextureList[i]->LoadTexture())
-					{
-						printf("FallÃƒÂ³ en cargar la Textura :%s\n", texPath);
-						delete TextureList[i];
-						TextureList[i] = nullptr;
-					}
-				}*/
-			}
-		}
-		//Si no se pudo cargar la textura o no tiene una textura asignada, asignar una textura por defecto
-		if (!TextureList[i])
-		{
-			TextureList[i] = new Texture("Textures/plain.png"); //textura que se aplicarÃƒÂ¡ a los modelos si no tienen textura o la textura no se puede cargar
-			if (!TextureList[i]->LoadTextureA()) ok = false;
-		}
-
-	}
+    bool ok = true;
+    TextureList.resize(scene->mNumMaterials, nullptr);
+    materialColors.resize(scene->mNumMaterials, glm::vec3(1));
+    materialSpecular.resize(scene->mNumMaterials, .2f);
+    materialShininess.resize(scene->mNumMaterials, 16.0f);
+    for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
+        aiMaterial* material = scene->mMaterials[i];
+        aiColor3D diffuse(1,1,1), specular(.2f,.2f,.2f);
+        material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
+        material->Get(AI_MATKEY_COLOR_SPECULAR, specular);
+        material->Get(AI_MATKEY_SHININESS, materialShininess[i]);
+        materialColors[i] = glm::vec3(diffuse.r,diffuse.g,diffuse.b);
+        materialSpecular[i] = (specular.r+specular.g+specular.b)/3;
+        if (materialShininess[i] < 1) materialShininess[i] = 1;
+        aiString path;
+        if (material->GetTexture(aiTextureType_DIFFUSE,0,&path)==AI_SUCCESS) {
+            std::string filename(path.C_Str());
+            auto separator=filename.find_last_of("/\\");
+            if(separator!=std::string::npos)filename=filename.substr(separator+1);
+            std::string full="Textures/"+filename;
+            TextureList[i]=new Texture(full.c_str());
+            if(!TextureList[i]->LoadTextureA())ok=false;
+        }
+        // Sin mapa difuso, usar Kd del MTL directamente, nunca plain.png.
+    }
     return ok;
 }

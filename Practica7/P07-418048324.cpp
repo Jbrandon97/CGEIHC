@@ -308,17 +308,42 @@ glm::mat4 TR(glm::vec3 p,float giro) {
     return glm::rotate(glm::translate(glm::mat4(1),p),glm::radians(giro),glm::vec3(0,1,0));
 }
 void Mover(Estado& e,const bool* k,float dt) {
-    for(int j=0;j<6;j++)if(k[GLFW_KEY_4+j])e.pata=j;
-    e.patas[e.pata]=std::clamp(e.patas[e.pata]+(float(k[GLFW_KEY_B])-float(k[GLFW_KEY_V]))*12*dt,-12.0f,12.0f);
-    e.giroRover += (float(k[GLFW_KEY_J])-float(k[GLFW_KEY_L]))*45*dt;
-    e.giroAvion += (float(k[GLFW_KEY_Z])-float(k[GLFW_KEY_X]))*35*dt;
-    e.rover += glm::vec3(TR({},e.giroRover)*glm::vec4(1,0,0,0))*(float(k[GLFW_KEY_I])-float(k[GLFW_KEY_K]))*3.0f*dt;
-    e.avion += glm::vec3(TR({},e.giroAvion)*glm::vec4(0,0,1,0))*(float(k[GLFW_KEY_UP])-float(k[GLFW_KEY_DOWN]))*3.0f*dt;
-    e.avion.y=std::clamp(e.avion.y+(float(k[GLFW_KEY_PAGE_UP])-float(k[GLFW_KEY_PAGE_DOWN]))*3*dt,2.5f,14.0f);
-    e.base=std::clamp(e.base+(float(k[GLFW_KEY_T])-float(k[GLFW_KEY_G]))*30*dt,-70.0f,70.0f);
-    e.brazo1=std::clamp(e.brazo1+(float(k[GLFW_KEY_Y])-float(k[GLFW_KEY_H]))*25*dt,-35.0f,35.0f);
-    e.brazo2=std::clamp(e.brazo2+(float(k[GLFW_KEY_U])-float(k[GLFW_KEY_N]))*25*dt,-35.0f,35.0f);
-    e.suspension=std::clamp(e.suspension+(float(k[GLFW_KEY_O])-float(k[GLFW_KEY_P]))*12*dt,-8.0f,8.0f);
+    e.giroRover += (float(k[GLFW_KEY_Z])-float(k[GLFW_KEY_X]))*45*dt;
+    e.giroAvion += (float(k[GLFW_KEY_J])-float(k[GLFW_KEY_L]))*35*dt;
+    e.rover += glm::vec3(TR({},e.giroRover)*glm::vec4(1,0,0,0))*(float(k[GLFW_KEY_Q])-float(k[GLFW_KEY_E]))*3.0f*dt;
+    e.avion += glm::vec3(TR({},e.giroAvion)*glm::vec4(0,0,1,0))*(float(k[GLFW_KEY_U])-float(k[GLFW_KEY_O]))*3.0f*dt;
+    e.avion.y=std::clamp(e.avion.y+(float(k[GLFW_KEY_I])-float(k[GLFW_KEY_K]))*3*dt,2.5f,14.0f);
+    e.base=std::clamp(e.base+(float(k[GLFW_KEY_C])-float(k[GLFW_KEY_V]))*30*dt,-70.0f,70.0f);
+    e.brazo1=std::clamp(e.brazo1+(float(k[GLFW_KEY_B])-float(k[GLFW_KEY_N]))*25*dt,-35.0f,35.0f);
+    e.brazo2=std::clamp(e.brazo2+(float(k[GLFW_KEY_M])-float(k[GLFW_KEY_COMMA]))*25*dt,-35.0f,35.0f);
+}
+void ControlarLuces(const bool* k,const bool* prev,bool* luces) {
+    for(int j=0;j<3;j++)if(k[GLFW_KEY_1+j]&&!prev[GLFW_KEY_1+j])luces[j]=!luces[j];
+    if(k[GLFW_KEY_4]&&!prev[GLFW_KEY_4]) {
+        bool activar=!(luces[0]&&luces[1]&&luces[2]);
+        for(int j=0;j<3;j++)luces[j]=activar;
+    }
+}
+bool ProbarControles() {
+    const int teclas[]={GLFW_KEY_Q,GLFW_KEY_E,GLFW_KEY_Z,GLFW_KEY_X,GLFW_KEY_U,GLFW_KEY_O,GLFW_KEY_I,GLFW_KEY_K,GLFW_KEY_J,GLFW_KEY_L,GLFW_KEY_C,GLFW_KEY_V,GLFW_KEY_B,GLFW_KEY_N,GLFW_KEY_M,GLFW_KEY_COMMA};
+    const float esperados[]={3,-3,45,-45,3,-3,3,-3,35,-35,30,-30,25,-25,25,-25};
+    for(int i=0;i<16;i++){
+        Estado e;bool k[1024]={};k[teclas[i]]=true;Mover(e,k,1);
+        float valor=i<2?e.rover.x+7:i<4?e.giroRover:i<6?e.avion.z:i<8?e.avion.y-5.5f:i<10?e.giroAvion:i<12?e.base:i<14?e.brazo1:e.brazo2;
+        if(std::abs(valor-esperados[i])>.0001f)return false;
+    }
+    for(int i=0;i<3;i++){
+        bool k[1024]={},prev[1024]={},luces[]={true,true,true};k[GLFW_KEY_1+i]=true;
+        ControlarLuces(k,prev,luces);for(int j=0;j<3;j++)if(luces[j]!=(j!=i))return false;
+        std::copy(k,k+1024,prev);ControlarLuces(k,prev,luces);if(luces[i])return false;
+    }
+    bool k[1024]={},prev[1024]={},luces[]={true,true,true};k[GLFW_KEY_4]=true;
+    ControlarLuces(k,prev,luces);if(luces[0]||luces[1]||luces[2])return false;
+    ControlarLuces(k,prev,luces);if(!luces[0]||!luces[1]||!luces[2])return false;
+    puts("Controles: 16 sentidos de movimiento y conmutacion 1/2/3/4 OK");return true;
+}
+void Ayuda() {
+    puts("CONTROLES P07\nCamara: WASD + mouse\nRover: Q/E avanzar/retroceder; Z/X girar\nAvion: U/O avanzar/retroceder; I/K subir/bajar; J/L girar\nLuces: 1 faro rover; 2 inferior avion; 3 frontal avion; 4 todas\nBrazo: C/V base; B/N segmento 1; M/coma segmento 2\nVistas: F5 libre; F6 dado y holocron; F7 rover; F8 avion\nF9 demostracion de suspension y patas (activar/desactivar)\nR restablecer vehiculos y demostracion; Esc salir");
 }
 struct Faro { glm::vec3 posicion,direccion; };
 Faro AsociarLuz(SpotLight& luz,const glm::mat4& padre,glm::vec3 offset,glm::vec3 direccion) {
@@ -335,11 +360,13 @@ void Capturar(const std::filesystem::path& file,int w,int h) {
     for(int y=h-1;y>=0;--y)out.write(reinterpret_cast<char*>(pixels.data()+y*w*3),w*3);
 }
 int main(int argc,char** argv) {
+    Ayuda();
     const bool prueba=argc>1 && std::string(argv[1])=="--pruebas";
     std::filesystem::path evidencia=argc>2?std::filesystem::absolute(argv[2]):std::filesystem::path("evidencias");
     wchar_t ruta[MAX_PATH];GetModuleFileNameW(nullptr,ruta,MAX_PATH);
     std::filesystem::current_path(std::filesystem::path(ruta).parent_path());
     if(mainWindow.Initialise()!=0)return 1;
+    if(prueba&&!ProbarControles())return 7;
     glfwSwapInterval(prueba?0:1);
     printf("OpenGL %s | GPU %s\n",glGetString(GL_VERSION),glGetString(GL_RENDERER));
     while(glGetError()!=GL_NO_ERROR){}
@@ -363,8 +390,8 @@ int main(int argc,char** argv) {
     DirectionalLight sol(1,.98f,.92f,.22f,.58f,-.5f,-1,-.3f);
     SpotLight luces[3];bool encendidas[3]={true,true,true},prev[1024]={};
     Material mate(.2f,16),brillo(.7f,64);
-    Camera cam(glm::vec3(22,16,29),glm::vec3(0,1,0),-125,-22,8,.2f);
-    Estado e;int vista=0,frame=0;double ultimo=glfwGetTime();
+    Camera cam(glm::vec3(22,16,29),glm::vec3(0,1,0),-127.184706f,-21.037221f,8,.2f);
+    Estado e;bool demo=false;float demoTime=0;int vista=0,frame=0;double ultimo=glfwGetTime();
     std::ofstream log;
     if(prueba){std::filesystem::create_directories(evidencia);log.open(evidencia/"pruebas.csv");log<<"caso,luz,px,py,pz,dx,dy,dz\n";}
     const char* casos[]={"01_escena","02_dado_holocron","03_rover","04_rover_avanza","05_rover_retrocede","06_avion_inferior","07_avion_sube","08_avion_baja","09_avion_frontal","10_avion_avanza","11_avion_retrocede","12_rover_articulado","13_rover_gira","14_avion_gira","15_pata_1","16_pata_2","17_pata_3","18_pata_4","19_pata_5","20_pata_6"};
@@ -372,28 +399,29 @@ int main(int argc,char** argv) {
         double now=glfwGetTime();float dt=std::min(float(now-ultimo),.05f);ultimo=now;glfwPollEvents();bool* k=mainWindow.getsKeys();
         if(!prueba){
             Mover(e,k,dt);cam.keyControl(k,dt);
-            if(glfwGetMouseButton(glfwGetCurrentContext(),GLFW_MOUSE_BUTTON_RIGHT)==GLFW_PRESS)cam.mouseControl(mainWindow.getXChange(),mainWindow.getYChange());
-            else {mainWindow.getXChange();mainWindow.getYChange();}
-            for(int j=0;j<4;j++)if(k[GLFW_KEY_0+j])vista=j;
-            for(int j=0;j<3;j++)if(k[GLFW_KEY_F1+j]&&!prev[GLFW_KEY_F1+j])encendidas[j]=!encendidas[j];
-            if(k[GLFW_KEY_R])e=Estado();
+            cam.mouseControl(mainWindow.getXChange(),mainWindow.getYChange());
+            for(int j=0;j<4;j++)if(k[GLFW_KEY_F5+j])vista=j;
+            ControlarLuces(k,prev,encendidas);
+            if(k[GLFW_KEY_F9]&&!prev[GLFW_KEY_F9])demo=!demo;
+            if(demo){demoTime+=dt;e.suspension=5*sinf(demoTime);for(int j=0;j<6;j++)e.patas[j]=7*sinf(demoTime+j*.5f);}
+            if(k[GLFW_KEY_R]){e=Estado();demo=false;demoTime=0;}
             std::copy(k,k+1024,prev);
         }else{
             e=Estado();vista=0;
             bool sim[1024]={};
             if(frame==1)vista=1;
             if(frame>=2&&frame<=4)vista=2;
-            if(frame==3)sim[GLFW_KEY_I]=true;
-            if(frame==4)sim[GLFW_KEY_K]=true;
+            if(frame==3)sim[GLFW_KEY_Q]=true;
+            if(frame==4)sim[GLFW_KEY_E]=true;
             if(frame>=5&&frame<=10)vista=3;
-            if(frame==6)sim[GLFW_KEY_PAGE_UP]=true;
-            if(frame==7)sim[GLFW_KEY_PAGE_DOWN]=true;
-            if(frame==9)sim[GLFW_KEY_UP]=true;
-            if(frame==10)sim[GLFW_KEY_DOWN]=true;
-            if(frame==11){vista=2;sim[GLFW_KEY_T]=sim[GLFW_KEY_Y]=sim[GLFW_KEY_U]=sim[GLFW_KEY_O]=true;}
-            if(frame==12){vista=2;sim[GLFW_KEY_J]=true;}
-            if(frame==13){vista=3;sim[GLFW_KEY_Z]=true;}
-            if(frame>=14){vista=2;sim[GLFW_KEY_4+frame-14]=true;sim[GLFW_KEY_B]=true;}
+            if(frame==6)sim[GLFW_KEY_I]=true;
+            if(frame==7)sim[GLFW_KEY_K]=true;
+            if(frame==9)sim[GLFW_KEY_U]=true;
+            if(frame==10)sim[GLFW_KEY_O]=true;
+            if(frame==11){vista=2;e.suspension=5;sim[GLFW_KEY_C]=sim[GLFW_KEY_B]=sim[GLFW_KEY_M]=true;}
+            if(frame==12){vista=2;sim[GLFW_KEY_Z]=true;}
+            if(frame==13){vista=3;sim[GLFW_KEY_J]=true;}
+            if(frame>=14){vista=2;e.patas[frame-14]=12;}
             Mover(e,sim,1.0f);
         }
         int w,h;glfwGetFramebufferSize(glfwGetCurrentContext(),&w,&h);if(!w||!h){glfwWaitEvents();continue;}glViewport(0,0,w,h);
@@ -405,7 +433,7 @@ int main(int argc,char** argv) {
         glm::mat4 view=cam.calculateViewMatrix();
         if(prueba||vista){
             if(vista==0){eye={22,16,29};target={0,2,0};}
-            if(vista==1){eye={-2,7,18};target={-2,1,9};}
+            if(vista==1){eye={-2,10,21};target={-7,5.5f,6};}
             if(vista==2){eye={6,9,16};target={-5,1,0};}
             if(vista==3){eye={18,15,27};target={5,2,5};}
             view=glm::lookAt(eye,target,glm::vec3(0,1,0));
@@ -415,15 +443,16 @@ int main(int argc,char** argv) {
         glUniformMatrix4fv(shader.GetProjectionLocation(),1,GL_FALSE,glm::value_ptr(proj));glUniformMatrix4fv(shader.GetViewLocation(),1,GL_FALSE,glm::value_ptr(view));
         glUniform3fv(shader.GetEyePositionLocation(),1,glm::value_ptr(eye));glUniform3f(shader.getColorLocation(),1,1,1);
         glUniform1i(glGetUniformLocation(id,"alphaCutout"),0);
+        glUniform1i(glGetUniformLocation(id,"useMaterialTexture"),1);
         shader.SetDirectionalLight(&sol);shader.SetPointLights(nullptr,0);shader.SetSpotLights(luces,3);
         auto model=[&](const glm::mat4& m){glUniformMatrix4fv(shader.GetModelLocation(),1,GL_FALSE,glm::value_ptr(m));};
         mate.UseMaterial(shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
         model(glm::scale(glm::mat4(1),glm::vec3(4,1,4)));piso.UseTexture();meshListModel[2]->RenderMeshModel();
-        model(glm::scale(glm::rotate(glm::translate(glm::mat4(1),glm::vec3(-5,1,9)),glm::radians(-90.0f),glm::vec3(0,0,1)),glm::vec3(2)));
+        model(glm::scale(glm::rotate(glm::translate(glm::mat4(1),glm::vec3(-5,5,6)),glm::radians(-90.0f),glm::vec3(0,0,1)),glm::vec3(2)));
         dado.UseTexture();meshListModel[4]->RenderMeshModel();
-        model(glm::scale(glm::translate(glm::mat4(1),glm::vec3(0,1.56f,9)),glm::vec3(.6f)));holo.UseTexture();holocronCodigo.RenderMeshModel();
+        model(glm::scale(glm::translate(glm::mat4(1),glm::vec3(-9,7,6)),glm::vec3(.6f)));holo.UseTexture();holocronCodigo.RenderMeshModel();
         brillo.UseMaterial(shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
-        model(glm::translate(glm::scale(a,glm::vec3(.065f)),glm::vec3(0,-14,23)));avion.RenderModel();
+        model(glm::translate(glm::scale(a,glm::vec3(.065f)),glm::vec3(0,-14,23)));avion.RenderModel(shader.getColorLocation(),glGetUniformLocation(id,"useMaterialTexture"),shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
         // Conversion de Blender Z arriba a OpenGL Y arriba, compartida por todas las piezas.
         glm::mat4 raiz=glm::scale(glm::rotate(r,glm::radians(-90.0f),glm::vec3(1,0,0)),glm::vec3(.36f));
         glm::mat4 mundial[12];
@@ -435,9 +464,11 @@ int main(int argc,char** argv) {
             if(i==4||i==5)t=glm::rotate(t,glm::radians(i==4?e.brazo1:e.brazo2),glm::vec3(0,1,0));
             if(i==1||i==2)t=glm::rotate(t,glm::radians(e.suspension*(i==1?1:-1)),glm::vec3(0,1,0));
             if(i>=6)t=glm::rotate(t,glm::radians(e.patas[i-6]),glm::vec3(0,1,0));
-            mundial[i]=(padre<0?raiz:mundial[padre])*t;model(mundial[i]);rover[i].RenderModel();
+            mundial[i]=(padre<0?raiz:mundial[padre])*t;model(mundial[i]);rover[i].RenderModel(shader.getColorLocation(),glGetUniformLocation(id,"useMaterialTexture"),shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
         }
         // Faro visible: usa la misma matriz y offset que su spotlight.
+        glUniform3f(shader.getColorLocation(),1,1,1);glUniform1i(glGetUniformLocation(id,"useMaterialTexture"),1);
+        brillo.UseMaterial(shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
         faroTex.UseTexture();
         model(glm::scale(glm::rotate(glm::translate(r,glm::vec3(1.32f,1.35f,.2f)),glm::radians(90.0f),glm::vec3(0,1,0)),glm::vec3(.25f)));lente.RenderMeshModel();
         model(glm::scale(glm::rotate(glm::translate(a,glm::vec3(0,-.2f,3.15f)),glm::radians(0.0f),glm::vec3(0,1,0)),glm::vec3(.22f)));lente.RenderMeshModel();
@@ -450,7 +481,7 @@ int main(int argc,char** argv) {
             for(int j=0;j<3;j++)log<<casos[frame]<<","<<j<<","<<f[j].posicion.x<<","<<f[j].posicion.y<<","<<f[j].posicion.z<<","<<f[j].direccion.x<<","<<f[j].direccion.y<<","<<f[j].direccion.z<<"\n";
             printf("PRUEBA %s OK\n",casos[frame]);
         }
-        glfwSetWindowTitle(glfwGetCurrentContext(),"P07 Iluminacion 1 | 0-3 vistas | I/K rover | Flechas y RePag/AvPag avion | F1-F3 luces | R reiniciar");
+        glfwSetWindowTitle(glfwGetCurrentContext(),"P07 - Iluminacion 1");
         mainWindow.swapBuffers();if(prueba&&++frame==20)break;
     }
     for(auto& m:rover)m.ClearModel();avion.ClearModel();for(auto m:meshListModel)delete m;holocronCodigo.ClearMeshModel();lente.ClearMeshModel();

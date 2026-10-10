@@ -14,7 +14,7 @@ public:
 	bool getShouldClose() {
 		return  glfwWindowShouldClose(mainWindow);}
 	bool* getsKeys() { return keys; }
-    int consumeVista() { int v = vistaElegida; vistaElegida = -1; return v; }
+
 	GLfloat getXChange();
 	GLfloat getYChange();
 	void swapBuffers() { return glfwSwapBuffers(mainWindow); }
@@ -28,11 +28,11 @@ public:
 	GLfloat getarticulacion5() { return articulacion5; }
 	GLfloat getarticulacion6() { return articulacion6; }
 	GLfloat getGiroRueda(int indice) const;
-	void actualizarControles(GLfloat deltaTime);
+
 
 	~Window();
 private:
-    int vistaElegida = -1; 
+ 
 	GLFWwindow *mainWindow = nullptr;
 	GLint width, height;
 	GLfloat rotax,rotay,rotaz, articulacion1, articulacion2, articulacion3, articulacion4, articulacion5, articulacion6;

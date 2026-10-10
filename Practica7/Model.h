@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <glm.hpp>
 #include<string>
 #include<assimp/Importer.hpp>
 #include<assimp/scene.h>
@@ -14,7 +15,7 @@ public:
 	Model();
 
 	bool LoadModel(const std::string& fileName);
-	void RenderModel();
+	void RenderModel(GLint colorLocation, GLint textureLocation, GLint specularLocation, GLint shininessLocation);
 	void ClearModel();
 
 	~Model();
@@ -26,5 +27,8 @@ private:
 	std::vector<MeshModel*>MeshList;
 	std::vector<Texture*>TextureList;
 	std::vector<unsigned int>meshTotex;
+    std::vector<glm::vec3> materialColors;
+    std::vector<float> materialSpecular, materialShininess;
 };
+
 
