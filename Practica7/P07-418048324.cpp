@@ -301,8 +301,7 @@ void CrearHolocron()
 
 struct Estado {
     glm::vec3 rover{-7.0f,0.10f,0.0f}, avion{5.0f,5.5f,0.0f};
-    float patas[6]={}; int pata=0;
-    float giroRover=0, giroAvion=0, base=0, brazo1=0, brazo2=0, suspension=0;
+    float giroRover=0, giroAvion=0, base=0, brazo1=0, brazo2=0;
 };
 glm::mat4 TR(glm::vec3 p,float giro) {
     return glm::rotate(glm::translate(glm::mat4(1),p),glm::radians(giro),glm::vec3(0,1,0));
@@ -343,7 +342,7 @@ bool ProbarControles() {
     puts("Controles: 16 sentidos de movimiento y conmutacion 1/2/3/4 OK");return true;
 }
 void Ayuda() {
-    puts("CONTROLES P07\nCamara: WASD + mouse\nRover: Q/E avanzar/retroceder; Z/X girar\nAvion: U/O avanzar/retroceder; I/K subir/bajar; J/L girar\nLuces: 1 faro rover; 2 inferior avion; 3 frontal avion; 4 todas\nBrazo: C/V base; B/N segmento 1; M/coma segmento 2\nVistas: F5 libre; F6 dado y holocron; F7 rover; F8 avion\nF9 demostracion de suspension y patas (activar/desactivar)\nR restablecer vehiculos y demostracion; Esc salir");
+    puts("CONTROLES P07\nCamara: WASD + mouse\nRover: Q/E avanzar/retroceder; Z/X girar\nAvion: U/O avanzar/retroceder; I/K subir/bajar; J/L girar\nLuces: 1 faro rover; 2 inferior avion; 3 frontal avion; 4 todas\nBrazo: C/V base; B/N segmento 1; M/coma segmento 2\nVistas: F5 libre; F6 dado y holocron; F7 rover; F8 avion\nR restablecer vehiculos y articulaciones; Esc salir");
 }
 struct Faro { glm::vec3 posicion,direccion; };
 Faro AsociarLuz(SpotLight& luz,const glm::mat4& padre,glm::vec3 offset,glm::vec3 direccion) {
@@ -391,10 +390,10 @@ int main(int argc,char** argv) {
     SpotLight luces[3];bool encendidas[3]={true,true,true},prev[1024]={};
     Material mate(.2f,16),brillo(.7f,64);
     Camera cam(glm::vec3(22,16,29),glm::vec3(0,1,0),-127.184706f,-21.037221f,8,.2f);
-    Estado e;bool demo=false;float demoTime=0;int vista=0,frame=0;double ultimo=glfwGetTime();
+    Estado e;int vista=0,frame=0;double ultimo=glfwGetTime();
     std::ofstream log;
     if(prueba){std::filesystem::create_directories(evidencia);log.open(evidencia/"pruebas.csv");log<<"caso,luz,px,py,pz,dx,dy,dz\n";}
-    const char* casos[]={"01_escena","02_dado_holocron","03_rover","04_rover_avanza","05_rover_retrocede","06_avion_inferior","07_avion_sube","08_avion_baja","09_avion_frontal","10_avion_avanza","11_avion_retrocede","12_rover_articulado","13_rover_gira","14_avion_gira","15_pata_1","16_pata_2","17_pata_3","18_pata_4","19_pata_5","20_pata_6"};
+    const char* casos[]={"01_escena","02_dado_holocron","03_rover","04_rover_avanza","05_rover_retrocede","06_avion_inferior","07_avion_sube","08_avion_baja","09_avion_frontal","10_avion_avanza","11_avion_retrocede","12_rover_articulado","13_rover_gira","14_avion_gira"};
     while(!mainWindow.getShouldClose()) {
         double now=glfwGetTime();float dt=std::min(float(now-ultimo),.05f);ultimo=now;glfwPollEvents();bool* k=mainWindow.getsKeys();
         if(!prueba){
@@ -402,9 +401,7 @@ int main(int argc,char** argv) {
             cam.mouseControl(mainWindow.getXChange(),mainWindow.getYChange());
             for(int j=0;j<4;j++)if(k[GLFW_KEY_F5+j])vista=j;
             ControlarLuces(k,prev,encendidas);
-            if(k[GLFW_KEY_F9]&&!prev[GLFW_KEY_F9])demo=!demo;
-            if(demo){demoTime+=dt;e.suspension=5*sinf(demoTime);for(int j=0;j<6;j++)e.patas[j]=7*sinf(demoTime+j*.5f);}
-            if(k[GLFW_KEY_R]){e=Estado();demo=false;demoTime=0;}
+            if(k[GLFW_KEY_R]){e=Estado();}
             std::copy(k,k+1024,prev);
         }else{
             e=Estado();vista=0;
@@ -418,10 +415,9 @@ int main(int argc,char** argv) {
             if(frame==7)sim[GLFW_KEY_K]=true;
             if(frame==9)sim[GLFW_KEY_U]=true;
             if(frame==10)sim[GLFW_KEY_O]=true;
-            if(frame==11){vista=2;e.suspension=5;sim[GLFW_KEY_C]=sim[GLFW_KEY_B]=sim[GLFW_KEY_M]=true;}
+            if(frame==11){vista=2;sim[GLFW_KEY_C]=sim[GLFW_KEY_B]=sim[GLFW_KEY_M]=true;}
             if(frame==12){vista=2;sim[GLFW_KEY_Z]=true;}
             if(frame==13){vista=3;sim[GLFW_KEY_J]=true;}
-            if(frame>=14){vista=2;e.patas[frame-14]=12;}
             Mover(e,sim,1.0f);
         }
         int w,h;glfwGetFramebufferSize(glfwGetCurrentContext(),&w,&h);if(!w||!h){glfwWaitEvents();continue;}glViewport(0,0,w,h);
@@ -462,8 +458,6 @@ int main(int argc,char** argv) {
             glm::mat4 t=glm::translate(glm::mat4(1),local);
             if(i==3)t=glm::rotate(t,glm::radians(e.base),glm::vec3(0,0,1));
             if(i==4||i==5)t=glm::rotate(t,glm::radians(i==4?e.brazo1:e.brazo2),glm::vec3(0,1,0));
-            if(i==1||i==2)t=glm::rotate(t,glm::radians(e.suspension*(i==1?1:-1)),glm::vec3(0,1,0));
-            if(i>=6)t=glm::rotate(t,glm::radians(e.patas[i-6]),glm::vec3(0,1,0));
             mundial[i]=(padre<0?raiz:mundial[padre])*t;model(mundial[i]);rover[i].RenderModel(shader.getColorLocation(),glGetUniformLocation(id,"useMaterialTexture"),shader.GetSpecularIntensityLocation(),shader.GetShininessLocation());
         }
         // Faro visible: usa la misma matriz y offset que su spotlight.
@@ -482,7 +476,7 @@ int main(int argc,char** argv) {
             printf("PRUEBA %s OK\n",casos[frame]);
         }
         glfwSetWindowTitle(glfwGetCurrentContext(),"P07 - Iluminacion 1");
-        mainWindow.swapBuffers();if(prueba&&++frame==20)break;
+        mainWindow.swapBuffers();if(prueba&&++frame==14)break;
     }
     for(auto& m:rover)m.ClearModel();avion.ClearModel();for(auto m:meshListModel)delete m;holocronCodigo.ClearMeshModel();lente.ClearMeshModel();
     printf("CIERRE CORRECTO, sin errores OpenGL.\n");return 0;

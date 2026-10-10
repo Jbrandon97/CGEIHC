@@ -12,8 +12,7 @@ La ayuda se imprime una sola vez al iniciar. No hay funciones de movimiento en l
 - 4: apaga las tres si estan encendidas; si alguna esta apagada, enciende todas.
 - C/V: base del brazo; B/N: brazo 1; M/coma: brazo 2.
 - F5: camara libre; F6: dado y holocron; F7: rover; F8: avion.
-- F9: activar/detener demostracion de suspension y patas.
-- R: restablecer vehiculos y detener demostracion. Esc: salir.
+- R: restablecer vehiculos y articulaciones. Esc: salir.
 
 ## Posiciones
 Dado: centro (-5,5,6), escala 2 y rotacion -90 grados alrededor de Z; cara inferior a 4 unidades sobre el piso.
@@ -24,12 +23,12 @@ Piso en Y=0. Se conservan las geometrias y coordenadas UV originales.
 Dado: CrearDado del Ejercicio 6, 24 vertices/36 indices y UV Star Wars originales.
 Holocron: CrearHolocron de P06, 12 posiciones/20 triangulos, UV originales y normales planas por producto cruz.
 Avion: OBJ/MTL y textura Ripslinger originales de P06, sin alteracion de geometria ni UV.
-Rover: fuente E04 corregida en Blender; 12 OBJ locales: cuerpo, dos suspensiones, base y dos segmentos del brazo, seis conjuntos pata-rueda. La jerarquia y los pivotes estan en Practica7/Models/rover_jerarquia.json y Rover_Corregido.blend. La rotacion de una pata conserva su rueda como parte de la misma malla; no simula rodadura ni contacto fisico con el terreno.
+Rover: fuente E04 corregida en Blender; 12 OBJ locales: cuerpo, dos suspensiones, base y dos segmentos del brazo, seis conjuntos pata-rueda. La jerarquia y los pivotes estan en Practica7/Models/rover_jerarquia.json y Rover_Corregido.blend. Las suspensiones y los conjuntos pata-rueda mantienen su posicion local respecto al cuerpo. El brazo conserva sus tres articulaciones.
 
 Las tres luces se actualizan con AsociarLuz: posicion = padre * vec4(offset,1); direccion = normalize(padre * vec4(direccionLocal,0)). El faro frontal del avion se inclina hacia el piso para mostrar su haz. Se conserva DirectionalLight, PointLight, SpotLight, Material y shader_light; no hay luces puntuales activas.
 
 ## Verificacion reproducible
-Ejecutar P07-418048324.exe --pruebas RUTA_DE_SALIDA genera 20 capturas PPM reales del framebuffer y pruebas.csv con posiciones/direcciones. La secuencia usa la misma funcion de movimiento que el teclado y termina automaticamente. Incluye avance/retroceso, subida/bajada, giros, brazo/suspension y las seis patas. No genera video.
+Ejecutar P07-418048324.exe --pruebas RUTA_DE_SALIDA genera 14 capturas PPM reales del framebuffer y pruebas.csv con posiciones/direcciones. La secuencia usa la misma funcion de movimiento que el teclado y termina automaticamente. Incluye avance/retroceso, subida/bajada, giros, articulacion del brazo y seguimiento de las luces.
 
 Las carpetas Models, Textures y shaders de la raiz permiten ejecutar el EXE directamente; sus copias en Practica7 permiten compilar y copiar recursos, siguiendo P05/P06. Los temporales de compilacion estan excluidos del ZIP y de Git.
 
