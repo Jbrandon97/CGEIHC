@@ -24,7 +24,7 @@ private:
     GLint width,height;
     bool keys[1024]={};
     bool principales=true, motores[2]={true,true};
-    int vista=1;
+    int vista=0;
     bool primerMouse=true;
     double lastX=0,lastY=0;
     GLfloat xChange=0,yChange=0;

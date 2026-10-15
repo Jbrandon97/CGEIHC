@@ -1,6 +1,8 @@
 #include "Window.h"
+#include "Camera.h"
 #include <cstdio>
 #include <cmath>
+#include <initializer_list>
 
 Window::Window(GLint w,GLint h):width(w),height(h) {}
 int Window::Initialise() {
@@ -54,6 +56,23 @@ Window::~Window(){if(handle)glfwDestroyWindow(handle);glfwTerminate();}
 void Pulso(Window& w,int key) {w.ProcesarTecla(key,GLFW_PRESS);w.ProcesarTecla(key,GLFW_RELEASE);}
 bool Window::ProbarControles() {
     Window& w=*this;
+    if(vista!=0)return false;
+    Camera prueba({13,10,-17},{0,1,0},128,-17,10,.15f);
+    for(int tecla:{GLFW_KEY_W,GLFW_KEY_S,GLFW_KEY_A,GLFW_KEY_D}){
+        glm::vec3 antes=prueba.getCameraPosition();
+        ProcesarTecla(tecla,GLFW_PRESS);prueba.keyControl(keys,.1f);ProcesarTecla(tecla,GLFW_RELEASE);
+        if(glm::length(prueba.getCameraPosition()-antes)<.99f)return false;
+    }
+    primerMouse=true;ManejaMouse(handle,100,100);ManejaMouse(handle,120,110);
+    glm::vec3 antes=prueba.getCameraDirection();
+    prueba.mouseControl(getXChange(),getYChange());
+    if(glm::length(prueba.getCameraDirection()-antes)<.01f)return false;
+    for(int tecla:{GLFW_KEY_F6,GLFW_KEY_F7,GLFW_KEY_F8}){
+        Pulso(w,tecla);if(vista!=tecla-GLFW_KEY_F5)return false;
+        Pulso(w,GLFW_KEY_F5);if(vista!=0)return false;
+    }
+    primerMouse=true;
+    puts("Camara libre inicial: WASD, mouse y retorno F5 verificados");
     for(int key=GLFW_KEY_1;key<=GLFW_KEY_3;key++){
         w.RestablecerLuces();
         for(int i=0;i<20;i++){

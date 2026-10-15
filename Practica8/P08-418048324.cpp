@@ -13,6 +13,7 @@
 #include "Model.h"
 #include "Shader_light.h"
 #include "Texture.h"
+#include "Skybox.h"
 
 void Capturar(const std::filesystem::path& path,int w,int h) {
     std::vector<unsigned char> pixels(w*h*3);
@@ -50,19 +51,36 @@ int main(int argc,char** argv) {
     glm::vec3 motores[2]={posicion(salidas[0]),posicion(salidas[1])};
     glm::vec3 puntoPrincipal=posicion({0,23,0}),faro=posicion({-.7f,2,25});
     glm::vec3 direccion=glm::normalize(glm::mat3(ship)*glm::vec3(0,-.65f,1));
+    std::vector<std::string> faces;
+    for(const char* face:{"rt","lf","up","dn","bk","ft"})faces.push_back(std::string("Textures/Skybox/cupertin-lake_")+face+".tga");
+    Skybox sky(faces);if(!sky.IsReady())return 9;
+    if(pruebas){
+        glViewport(0,0,128,128);
+        auto fondo=[&](glm::vec3 eye,glm::vec3 dir){
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+            sky.DrawSkybox(glm::lookAt(eye,eye+dir,glm::vec3(0,1,0)),glm::perspective(glm::radians(45.f),1.f,.1f,180.f));
+            std::vector<unsigned char> pixels(128*128*3);
+            glReadPixels(0,0,128,128,GL_RGB,GL_UNSIGNED_BYTE,pixels.data());return pixels;
+        };
+        auto a=fondo({0,0,0},{0,0,-1}),b=fondo({7,2,3},{0,0,-1}),c=fondo({0,0,0},{1,0,0});
+        GLint depth;GLboolean mask;glGetIntegerv(GL_DEPTH_FUNC,&depth);glGetBooleanv(GL_DEPTH_WRITEMASK,&mask);
+        if(a!=b||a==c||depth!=GL_LESS||mask!=GL_TRUE)return 10;
+        puts("Skybox: centrado, rotacion y restauracion de profundidad OK");
+    }
     Camera cam({13,10,-17},{0,1,0},128,-17,10,.15f);
     std::ofstream log;
     if(pruebas){std::filesystem::create_directories(destino);log.open(destino/"estados.csv");log<<"caso,principales,izquierdo,derecho,plasmas,puntuales,reflectores\n";}
-    const char* nombres[]={"A_todo_apagado","principales_sin_motores","izquierdo_sin_principales","C_solo_izquierdo","derecho_sin_principales","D_solo_derecho","E_motores_sin_principales","B_todo_encendido","vista_frontal","vista_superior"};
+    const char* nombres[]={"A_todo_apagado","principales_sin_motores","izquierdo_sin_principales","C_solo_izquierdo","derecho_sin_principales","D_solo_derecho","E_motores_sin_principales","B_todo_encendido","vista_frontal","vista_superior","inicio_libre"};
     double anterior=glfwGetTime();int caso=0;
     while(!window.getShouldClose()){
         glfwPollEvents();double ahora=glfwGetTime();float dt=float(std::min(ahora-anterior,.05));anterior=ahora;
         int vista=window.vistaActual();
         if(pruebas){
             window.AplicarCasoPrueba(caso<8?caso:7);
-            vista=caso==8?2:caso==9?3:1;
+            vista=caso==8?2:caso==9?3:caso==10?0:1;
         }
-        cam.keyControl(window.getsKeys(),dt);cam.mouseControl(window.getXChange(),window.getYChange());
+        float mouseX=window.getXChange(),mouseY=window.getYChange();
+        if(vista==0){cam.keyControl(window.getsKeys(),dt);cam.mouseControl(mouseX,mouseY);}
         glm::vec3 eye=cam.getCameraPosition(),target(0,4,0);glm::mat4 view=cam.calculateViewMatrix();
         if(vista){
             if(vista==1)eye={13,10,-17};
@@ -79,8 +97,10 @@ int main(int argc,char** argv) {
             PointLight(.05f,.32f,1,0,window.motorActivo(1)?3.0f:0,motores[1].x,motores[1].y,motores[1].z-.25f,1,.18f,.10f)
         };
         SpotLight reflector(1,.93f,.75f,0,principal?3.5f:0,faro.x,faro.y,faro.z,direccion.x,direccion.y,direccion.z,1,.06f,.02f,28);
-        shader.UseShader();shader.SetPointLights(puntos,3);shader.SetSpotLights(&reflector,1);
+        
         glm::mat4 projection=glm::perspective(glm::radians(45.f),float(width)/height,.1f,180.f);
+        sky.DrawSkybox(view,projection);
+        shader.UseShader();shader.SetPointLights(puntos,3);shader.SetSpotLights(&reflector,1);
         glUniformMatrix4fv(shader.GetProjectionLocation(),1,GL_FALSE,glm::value_ptr(projection));glUniformMatrix4fv(shader.GetViewLocation(),1,GL_FALSE,glm::value_ptr(view));
         glUniform3fv(shader.GetEyePositionLocation(),1,glm::value_ptr(eye));
         auto model=[&](const glm::mat4& m){glUniformMatrix4fv(shader.GetModelLocation(),1,GL_FALSE,glm::value_ptr(m));};
@@ -113,7 +133,7 @@ int main(int argc,char** argv) {
             Capturar(destino/(std::string(nombres[caso])+".ppm"),width,height);printf("PRUEBA %s OK\n",nombres[caso]);
         }
         if(glGetError()!=GL_NO_ERROR)return 8;
-        window.swapBuffers();if(pruebas&&++caso==10)break;
+        window.swapBuffers();if(pruebas&&++caso==11)break;
     }
     nave.ClearModel();puts("CIERRE CORRECTO, sin errores OpenGL");return 0;
 }
