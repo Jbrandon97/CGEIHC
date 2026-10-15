@@ -9,19 +9,13 @@ in vec4 vColor;
 out vec4 color;
 
 const int MAX_POINT_LIGHTS = 3;
-const int MAX_SPOT_LIGHTS = 4;
+const int MAX_SPOT_LIGHTS = 1;
 
 struct Light
 {
 	vec3 color;
 	float ambientIntensity;
 	float diffuseIntensity;
-};
-
-struct DirectionalLight 
-{
-	Light base;
-	vec3 direction;
 };
 
 struct PointLight
@@ -50,12 +44,12 @@ struct Material
 uniform int pointLightCount;
 uniform int spotLightCount;
 
-uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 uniform sampler2D theTexture;
 uniform bool alphaCutout;
+uniform bool emissive;
 uniform bool useMaterialTexture;
 uniform Material material;
 
@@ -70,7 +64,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 	
 	vec4 specularcolor = vec4(0, 0, 0, 0);
 	
-	if(diffuseFactor > 0.0f)
+	if(diffuseFactor > 0.0f && light.diffuseIntensity > 0.0f)
 	{//si hay diffuse color entonces existe specular color; dependemos de la posición de la cámara
 		vec3 fragToEye = normalize(eyePosition - FragPos);
 		vec3 reflectedVertex = normalize(reflect(direction, normalize(Normal)));
@@ -84,11 +78,6 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 	}
 
 	return (ambientcolor + diffusecolor + specularcolor);
-}
-
-vec4 CalcDirectionalLight()
-{
-	return CalcLightByDirection(directionalLight.base, directionalLight.direction);
 }
 
 //nuevo
@@ -159,12 +148,11 @@ vec4 CalcSpotLights()
 
 void main()
 {
-	vec4 finalcolor = CalcDirectionalLight();
-	finalcolor += CalcPointLights();
+	vec4 finalcolor = CalcPointLights();
 	finalcolor += CalcSpotLights();
 	vec4 texel = (useMaterialTexture ? texture(theTexture, TexCoord) : vec4(1))*vColor;
 	if(alphaCutout && texel.a < 0.1) discard;
-	color = vec4(texel.rgb * finalcolor.rgb, texel.a);
+	color = vec4(emissive ? texel.rgb : texel.rgb * finalcolor.rgb, texel.a);
 	//color = texture(theTexture, TexCoord)*vColor*finalcolor;
 	
 }
