@@ -94,3 +94,9 @@ void Window::AplicarCasoPrueba(int mask) {
     RestablecerLuces();
     for(int bit=0;bit<3;bit++)if(!(mask&(1<<bit)))Pulso(*this,GLFW_KEY_1+bit);
 }
+
+void Window::MostrarControles() const {
+    puts("Camara libre desde el inicio: WASD + mouse. F5: volver a libre.");
+    puts("1: luces principales | 2: motor izquierdo | 3: motor derecho");
+    puts("F6: posterior | F7: frontal | F8: superior | Esc: salir");
+}

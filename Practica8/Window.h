@@ -6,6 +6,7 @@ class Window {
 public:
     Window(GLint width=1280, GLint height=800);
     int Initialise();
+    void MostrarControles() const;
     bool getShouldClose() const;
     bool* getsKeys() { return keys; }
     GLfloat getXChange();

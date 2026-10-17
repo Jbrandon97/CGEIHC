@@ -32,7 +32,7 @@ int main(int argc,char** argv) {
     while(glGetError()!=GL_NO_ERROR){}
     glfwSwapInterval(pruebas?0:1);
     printf("OpenGL %s | %s\n",glGetString(GL_VERSION),glGetString(GL_RENDERER));
-    puts("1: luces principales | 2: motor izquierdo | 3: motor derecho\nF5: libre WASD + mouse | F6: posterior | F7: frontal | F8: superior | Esc: salir");
+    window.MostrarControles();
     if(pruebas&&!window.ProbarControles())return 2;
     Shader shader;shader.CreateFromFiles("shaders/shader_light.vert","shaders/shader_light.frag");shader.UseShader();
     GLint id=0,ok=0;glGetIntegerv(GL_CURRENT_PROGRAM,&id);glGetProgramiv(id,GL_LINK_STATUS,&ok);if(!ok)return 3;
@@ -67,6 +67,13 @@ int main(int argc,char** argv) {
         if(a!=b||a==c||depth!=GL_LESS||mask!=GL_TRUE)return 10;
         puts("Skybox: centrado, rotacion y restauracion de profundidad OK");
     }
+    // Configuracion permanente: apagar una luz no modifica su intensidad.
+    PointLight configuradas[3]={
+        PointLight(1,.96f,.88f,.35f,3.2f,puntoPrincipal.x,puntoPrincipal.y,puntoPrincipal.z,1,.04f,.008f),
+        PointLight(.05f,.32f,1,0,3.0f,motores[0].x,motores[0].y,motores[0].z-.25f,1,.18f,.10f),
+        PointLight(.05f,.32f,1,0,3.0f,motores[1].x,motores[1].y,motores[1].z-.25f,1,.18f,.10f)
+    };
+    SpotLight reflector(1,.93f,.75f,0,3.5f,faro.x,faro.y,faro.z,direccion.x,direccion.y,direccion.z,1,.06f,.02f,28);
     Camera cam({13,10,-17},{0,1,0},128,-17,10,.15f);
     std::ofstream log;
     if(pruebas){std::filesystem::create_directories(destino);log.open(destino/"estados.csv");log<<"caso,principales,izquierdo,derecho,plasmas,puntuales,reflectores\n";}
@@ -76,8 +83,9 @@ int main(int argc,char** argv) {
         glfwPollEvents();double ahora=glfwGetTime();float dt=float(std::min(ahora-anterior,.05));anterior=ahora;
         int vista=window.vistaActual();
         if(pruebas){
-            window.AplicarCasoPrueba(caso<8?caso:7);
-            vista=caso==8?2:caso==9?3:caso==10?0:1;
+            // Ida y vuelta: tambien probar el cero despues de cuadros con luces.
+            window.AplicarCasoPrueba(caso<8?caso:caso<16?15-caso:7);
+            vista=caso==16?2:caso==17?3:caso==18?0:1;
         }
         float mouseX=window.getXChange(),mouseY=window.getYChange();
         if(vista==0){cam.keyControl(window.getsKeys(),dt);cam.mouseControl(mouseX,mouseY);}
@@ -91,16 +99,18 @@ int main(int argc,char** argv) {
         int width,height;glfwGetFramebufferSize(glfwGetCurrentContext(),&width,&height);if(!width||!height){glfwWaitEvents();continue;}
         glViewport(0,0,width,height);glClearColor(.035f,.048f,.075f,1);glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         bool principal=window.principalesActivas();
-        PointLight puntos[3]={
-            PointLight(1,.96f,.88f,principal?.35f:0,principal?3.2f:0,puntoPrincipal.x,puntoPrincipal.y,puntoPrincipal.z,1,.04f,.008f),
-            PointLight(.05f,.32f,1,0,window.motorActivo(0)?3.0f:0,motores[0].x,motores[0].y,motores[0].z-.25f,1,.18f,.10f),
-            PointLight(.05f,.32f,1,0,window.motorActivo(1)?3.0f:0,motores[1].x,motores[1].y,motores[1].z-.25f,1,.18f,.10f)
-        };
-        SpotLight reflector(1,.93f,.75f,0,principal?3.5f:0,faro.x,faro.y,faro.z,direccion.x,direccion.y,direccion.z,1,.06f,.02f,28);
-        
+        PointLight puntos[3];
+        unsigned int pointLightCount=0;
+        if(principal)puntos[pointLightCount++]=configuradas[0];
+        for(int i=0;i<2;i++)if(window.motorActivo(i))puntos[pointLightCount++]=configuradas[i+1];
+        unsigned int spotLightCount=principal?1u:0u;
+
         glm::mat4 projection=glm::perspective(glm::radians(45.f),float(width)/height,.1f,180.f);
+        int dibujados=0;
+        auto renderizar=[&](){
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         sky.DrawSkybox(view,projection);
-        shader.UseShader();shader.SetPointLights(puntos,3);shader.SetSpotLights(&reflector,1);
+        shader.UseShader();shader.SetPointLights(puntos,pointLightCount);shader.SetSpotLights(&reflector,spotLightCount);
         glUniformMatrix4fv(shader.GetProjectionLocation(),1,GL_FALSE,glm::value_ptr(projection));glUniformMatrix4fv(shader.GetViewLocation(),1,GL_FALSE,glm::value_ptr(view));
         glUniform3fv(shader.GetEyePositionLocation(),1,glm::value_ptr(eye));
         auto model=[&](const glm::mat4& m){glUniformMatrix4fv(shader.GetModelLocation(),1,GL_FALSE,glm::value_ptr(m));};
@@ -111,29 +121,76 @@ int main(int argc,char** argv) {
         // Plasma emisivo: mezcla aditiva tras los objetos opacos, sin escribir profundidad.
         glEnable(GL_BLEND);glBlendFunc(GL_SRC_ALPHA,GL_ONE);glDepthMask(GL_FALSE);
         glUniform1i(emissive,1);glUniform1i(useTexture,1);glUniform3f(shader.getColorLocation(),1,1,1);plasma.UseTexture();
-        int dibujados=0;
+        dibujados=0;
         for(int i=0;i<2;i++)if(window.motorActivo(i)){
             model(glm::translate(glm::mat4(1),motores[i]+glm::vec3(0,0,-.025f)));chorro.RenderMeshModel();dibujados++;
         }
         glDepthMask(GL_TRUE);glDisable(GL_BLEND);glUniform1i(emissive,0);
+        };
+        renderizar();
         if(pruebas){
             GLint pc,sc;glGetUniformiv(id,glGetUniformLocation(id,"pointLightCount"),&pc);glGetUniformiv(id,glGetUniformLocation(id,"spotLightCount"),&sc);
-            if(pc!=3||sc!=1||dibujados!=int(window.motorActivo(0))+int(window.motorActivo(1)))return 6;
-            for(int i=0;i<4;i++){
-                std::string base=i<3?"pointLights["+std::to_string(i)+"]":"spotLights[0].base";
-                float intensidad,con,lin,exp;
-                glGetUniformfv(id,glGetUniformLocation(id,(base+".base.diffuseIntensity").c_str()),&intensidad);
-                glGetUniformfv(id,glGetUniformLocation(id,(base+".constant").c_str()),&con);
-                glGetUniformfv(id,glGetUniformLocation(id,(base+".linear").c_str()),&lin);
-                glGetUniformfv(id,glGetUniformLocation(id,(base+".exponent").c_str()),&exp);
-                bool activo=i==0||i==3?principal:window.motorActivo(i-1);
-                if((intensidad>0)!=activo||con<=0||lin<=0||exp<=0)return 7;
+            int mask=(principal?1:0)|(window.motorActivo(0)?2:0)|(window.motorActivo(1)?4:0);
+            const int esperadosP[8]={0,1,1,2,1,2,2,3};
+            const int esperadosS[8]={0,1,0,1,0,1,0,1};
+            if(pc!=esperadosP[mask]||sc!=esperadosS[mask]||dibujados!=int(window.motorActivo(0))+int(window.motorActivo(1)))return 6;
+            // Leer los uniformes reales de la GPU: configuracion y orden compacto.
+            int slot=0;
+            for(int fuente=0;fuente<4;fuente++){
+                if(!(fuente==0||fuente==3?principal:window.motorActivo(fuente-1)))continue;
+                std::string base=fuente<3?"pointLights["+std::to_string(slot++)+"]":"spotLights[0].base";
+                auto verificar=[&](std::string campo,float esperado){
+                    float actual;glGetUniformfv(id,glGetUniformLocation(id,(base+campo).c_str()),&actual);
+                    return std::abs(actual-esperado)<.0001f;
+                };
+                glm::vec3 pos=fuente==0?puntoPrincipal:fuente==3?faro:motores[fuente-1]+glm::vec3(0,0,-.25f);
+                glm::vec3 col=fuente==0?glm::vec3(1,.96f,.88f):fuente==3?glm::vec3(1,.93f,.75f):glm::vec3(.05f,.32f,1);
+                glm::vec3 actualPos,actualCol;
+                glGetUniformfv(id,glGetUniformLocation(id,(base+".position").c_str()),glm::value_ptr(actualPos));
+                glGetUniformfv(id,glGetUniformLocation(id,(base+".base.color").c_str()),glm::value_ptr(actualCol));
+                if(glm::length(pos-actualPos)>.0001f||glm::length(col-actualCol)>.0001f||
+                   !verificar(".base.diffuseIntensity",fuente==0?3.2f:fuente==3?3.5f:3.f)||
+                   !verificar(".base.ambientIntensity",fuente==0?.35f:0.f)||
+                   !verificar(".constant",1)||!verificar(".linear",fuente==0?.04f:fuente==3?.06f:.18f)||
+                   !verificar(".exponent",fuente==0?.008f:fuente==3?.02f:.10f))return 7;
+                if(fuente==3){
+                    glm::vec3 dir;float edge;
+                    glGetUniformfv(id,glGetUniformLocation(id,"spotLights[0].direction"),glm::value_ptr(dir));
+                    glGetUniformfv(id,glGetUniformLocation(id,"spotLights[0].edge"),&edge);
+                    if(glm::length(dir-direccion)>.0001f||std::abs(edge-std::cos(glm::radians(28.f)))>.0001f)return 7;
+                }
             }
-            log<<nombres[caso]<<","<<principal<<","<<window.motorActivo(0)<<","<<window.motorActivo(1)<<","<<dibujados<<","<<pc<<","<<sc<<"\n";
-            Capturar(destino/(std::string(nombres[caso])+".ppm"),width,height);printf("PRUEBA %s OK\n",nombres[caso]);
+            // Prueba negativa: valores enormes fuera del rango activo no cambian ningun pixel.
+            auto leerPixels=[&](){
+                std::vector<unsigned char> pix(width*height*3);
+                glPixelStorei(GL_PACK_ALIGNMENT,1);glReadBuffer(GL_BACK);glFinish();
+                glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,pix.data());return pix;
+            };
+            auto antes=leerPixels();
+            auto contaminar=[&](std::string base){
+                glUniform3f(glGetUniformLocation(id,(base+".base.color").c_str()),1,1,1);
+                glUniform1f(glGetUniformLocation(id,(base+".base.ambientIntensity").c_str()),1000000);
+                glUniform1f(glGetUniformLocation(id,(base+".base.diffuseIntensity").c_str()),1000000);
+                glUniform3f(glGetUniformLocation(id,(base+".position").c_str()),0,10,0);
+                glUniform1f(glGetUniformLocation(id,(base+".constant").c_str()),1);
+                glUniform1f(glGetUniformLocation(id,(base+".linear").c_str()),0);
+                glUniform1f(glGetUniformLocation(id,(base+".exponent").c_str()),0);
+            };
+            for(int i=pc;i<3;i++)contaminar("pointLights["+std::to_string(i)+"]");
+            if(!sc){
+                contaminar("spotLights[0].base");
+                glUniform3f(glGetUniformLocation(id,"spotLights[0].direction"),0,-1,0);
+                glUniform1f(glGetUniformLocation(id,"spotLights[0].edge"),-2);
+            }
+            renderizar();
+            if(antes!=leerPixels())return 11;
+            int indice=caso<8?caso:caso<16?15-caso:caso-8;
+            std::string nombre=std::to_string(caso)+"_"+nombres[indice];
+            log<<nombre<<","<<principal<<","<<window.motorActivo(0)<<","<<window.motorActivo(1)<<","<<dibujados<<","<<pc<<","<<sc<<"\n";
+            Capturar(destino/(nombre+".ppm"),width,height);printf("PRUEBA %s OK: %d puntuales, %d reflectores; slots inactivos sin efecto\n",nombre.c_str(),pc,sc);
         }
         if(glGetError()!=GL_NO_ERROR)return 8;
-        window.swapBuffers();if(pruebas&&++caso==11)break;
+        window.swapBuffers();if(pruebas&&++caso==19)break;
     }
     nave.ClearModel();puts("CIERRE CORRECTO, sin errores OpenGL");return 0;
 }
