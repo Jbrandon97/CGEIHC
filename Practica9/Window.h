@@ -1,34 +1,30 @@
 #pragma once
 #include <glew.h>
 #include <glfw3.h>
-
+class Camera;
 class Window {
 public:
-    Window(GLint width=1280, GLint height=800);
+    Window(GLint w=1280,GLint h=800):width(w),height(h){}
     int Initialise();
-    void MostrarControles() const;
     bool getShouldClose() const;
-    bool* getsKeys() { return keys; }
+    bool* getsKeys(){return keys;}
     GLfloat getXChange();
     GLfloat getYChange();
     void swapBuffers();
-    void ProcesarTecla(int key, int action);
-    bool principalesActivas() const { return principales; }
-    bool motorActivo(int i) const { return motores[i]; }
-    int vistaActual() const { return vista; }
-    void RestablecerLuces();
+    bool EnFoco() const;
+    int Vista() const {return vista;}
+    void ControlarCamara(Camera&,float dt);
     bool ProbarControles();
-    void AplicarCasoPrueba(int mask);
+    void MostrarControles() const;
     ~Window();
 private:
     GLFWwindow* handle=nullptr;
     GLint width,height;
-    bool keys[1024]={};
-    bool principales=true, motores[2]={true,true};
     int vista=0;
-    bool primerMouse=true;
+    bool keys[1024]={},primerMouse=true;
     double lastX=0,lastY=0;
     GLfloat xChange=0,yChange=0;
     static void ManejaTeclado(GLFWwindow*,int,int,int,int);
     static void ManejaMouse(GLFWwindow*,double,double);
+    static void ManejaFoco(GLFWwindow*,int);
 };
