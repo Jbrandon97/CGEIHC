@@ -2,7 +2,7 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "P09-418048324", "Practica9\P09-418048324.vcxproj", "{99000001-D232-4B11-9A9C-418048324091}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "P09-2-418048324", "Practica9-2\P09-2-418048324.vcxproj", "{99000001-D232-4B11-9A9C-418048324091}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

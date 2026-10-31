@@ -7,7 +7,7 @@ int Window::Initialise(){
     if(!glfwInit())return 1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
     glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-    handle=glfwCreateWindow(width,height,"P09-1 - Animacion basica | WASD y mouse",nullptr,nullptr);
+    handle=glfwCreateWindow(width,height,"P09-2 - Animacion compleja | WASD y mouse",nullptr,nullptr);
     if(!handle)return 1;
     glfwMakeContextCurrent(handle);glfwSetWindowUserPointer(handle,this);
     glfwSetKeyCallback(handle,ManejaTeclado);glfwSetCursorPosCallback(handle,ManejaMouse);glfwSetWindowFocusCallback(handle,ManejaFoco);
@@ -52,7 +52,7 @@ void Window::ControlarCamara(Camera& c,float dt){
 bool Window::getShouldClose() const{return glfwWindowShouldClose(handle)!=0;}
 void Window::swapBuffers(){glfwSwapBuffers(handle);}
 Window::~Window(){if(handle)glfwDestroyWindow(handle);glfwTerminate();}
-void Window::MostrarControles() const{puts("P09-1: animaciones automaticas. Camara libre desde el inicio: WASD + mouse. Esc: salir.\n1: seguir nave | 2: satelite | 3: circuito | 4: volver a libre.");}
+void Window::MostrarControles() const{puts("P09-2: holocron y Saturn V. WASD + mouse. Esc: salir.\n1: holocron | 2: cohete | 3: vista general | 4: camara libre.");}
 bool Window::ProbarControles(){
     if(vista!=0)return false;
     Camera c({140,100,140},{0,1,0},-135,-27,45,.15f);
