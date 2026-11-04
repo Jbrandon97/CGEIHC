@@ -17,7 +17,7 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="P09-2-418048324.cpp">
+    <ClCompile Include="P10-418048324.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
@@ -35,10 +35,7 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HolocronAnimado.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CoheteAnimado.cpp">
+    <ClCompile Include="KeyframesCohete.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Skybox.cpp">
@@ -76,10 +73,7 @@
     <ClInclude Include="Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HolocronAnimado.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoheteAnimado.h">
+    <ClInclude Include="KeyframesCohete.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
