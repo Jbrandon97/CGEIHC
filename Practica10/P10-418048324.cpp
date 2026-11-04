@@ -38,7 +38,6 @@ int main(int argc,char**argv){
     if(!keyframes.Leer("keyframescohete.txt")){puts("ERROR: keyframescohete.txt V2 ausente o invalido");return 8;}
     const glm::vec3 origen(0,-1.95f,0); // 0.05 unidades sobre el piso original.
     double anterior=glfwGetTime();bool focoAnterior=ventana.EnFoco();
-    int segundoAnterior=-1;
     while(!ventana.getShouldClose()){
         glfwPollEvents();double ahora=glfwGetTime(),dt=ahora-anterior;anterior=ahora;
         bool foco=ventana.EnFoco();if(!foco||!focoAnterior)dt=0;else dt=std::min(dt,.08);focoAnterior=foco;
@@ -48,8 +47,6 @@ int main(int argc,char**argv){
         if(ventana.ConsumirTecla(GLFW_KEY_R)){keyframes.Reiniciar();puts("Animacion reiniciada; ESPACIO para reproducir");}
         if(ventana.ConsumirTecla(GLFW_KEY_L))keyframes.Listar();
         keyframes.Actualizar(float(dt));
-        int segundo=int(keyframes.Tiempo());
-        if(segundo!=segundoAnterior){ventana.MostrarTiempo(segundo);segundoAnterior=segundo;}
         ventana.ControlarCamara(cam,float(dt));
         int w,h;glfwGetFramebufferSize(glfwGetCurrentContext(),&w,&h);if(w<1||h<1){glfwWaitEvents();continue;}
         glViewport(0,0,w,h);glm::mat4 proy=glm::perspective(glm::radians(50.f),float(w)/h,.1f,1600.f);

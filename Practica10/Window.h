@@ -16,7 +16,6 @@ public:
     void ControlarCamara(Camera&,float dt);
     bool ProbarControles();
     bool ConsumirTecla(int);
-    void MostrarTiempo(int);
     void MostrarControles() const;
     ~Window();
 private:

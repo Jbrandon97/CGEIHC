@@ -7,7 +7,7 @@ int Window::Initialise(){
     if(!glfwInit())return 1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
     glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-    handle=glfwCreateWindow(width,height,"P10 - Saturn V por etapas | ESPACIO: iniciar",nullptr,nullptr);
+    handle=glfwCreateWindow(width,height,u8"Práctica 10 - Animación por Keyframes",nullptr,nullptr);
     if(!handle)return 1;
     glfwMakeContextCurrent(handle);glfwSetWindowUserPointer(handle,this);
     glfwSetKeyCallback(handle,ManejaTeclado);glfwSetCursorPosCallback(handle,ManejaMouse);glfwSetWindowFocusCallback(handle,ManejaFoco);
@@ -58,7 +58,6 @@ void Window::MostrarControles() const{
     puts("1 seguimiento | 2 capsula | 3 vista general para grabar | 4 libre WASD y raton | Esc salir");
 }
 bool Window::ConsumirTecla(int k){if(k<0||k>=1024)return false;bool p=pulsaciones[k];pulsaciones[k]=false;return p;}
-void Window::MostrarTiempo(int t){char titulo[150];sprintf_s(titulo,"P10 - Saturn V | t=%02d s | 7: etapa 1 | 11: etapa 2 | 15: capsula | 24: orbita",t);glfwSetWindowTitle(handle,titulo);}
 bool Window::ProbarControles(){
     if(vista!=0)return false;
     Camera c({140,100,140},{0,1,0},-135,-27,45,.15f);

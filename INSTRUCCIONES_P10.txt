@@ -13,7 +13,7 @@ PARA OBSERVAR Y GRABAR
 4: camara libre; WASD y raton funcionan tambien desde el inicio.
 R: reiniciar y detener. G: guardar/sobrescribir TXT. O: leer TXT.
 L: consultar en consola todos los cuadros y sus estados. Esc: salir.
-El titulo muestra el tiempo. La animacion se pausa al perder el foco.
+La animacion se pausa al perder el foco.
 El video final queda a cargo del alumno.
 
 SECUENCIA
